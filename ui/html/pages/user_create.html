@@ -1,0 +1,16 @@
+{{define "main"}}
+<main class="container">
+	<form hx-post="/user/add" hx-target="#error">
+		<input type="text" name="username">
+		<div hx-post="/user/checkpass">
+			<input type="password" name="password">
+			<input type="password" name="password-confirm"  hx-trigger="keyup changed delay:1s"
+				hx-target="#error">
+			{{ template "pass-err" .ShowPassErr }}
+		</div>
+		<input type="submit" value="Create User Account">
+		<input type="hidden" name="redirect" value="true">
+	</form>
+</main>
+{{end}}
+

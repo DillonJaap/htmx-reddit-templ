@@ -1,0 +1,31 @@
+package templ	
+
+import (
+	"htmx-reddit/internal/web/components/post"
+)
+
+
+templ PostComponent(post post.Data) {
+	<div style="font-size: 2.0em;padding: 0em;">{ post.Title }</div>
+	<div class="container" style="
+	border: ridge;
+	border-radius: 0.3em;
+	padding: 1.0em;
+	">
+	<p>{ post.Body }</p>
+	<!-- 
+	{{ template "edit-button" .EditButton }}
+	{{ template "delete-button" .DeleteButton }}
+	-->
+	</div>
+}
+
+
+templ Post(post post.Data) {
+	@Base() {
+		<main class="container">
+			@PostComponent(post)
+			<!--{ { template "comment-component" . } } -->
+		</main>
+	}
+}

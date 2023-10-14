@@ -1,0 +1,29 @@
+{{define "base"}}
+<!DOCTYPE html>
+
+<html data-theme="dark">
+
+<head>
+	<script src="https://unpkg.com/htmx.org@1.9.4"
+		integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
+		crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+	<link rel='stylesheet' href='/css/main.css'>
+</head>
+
+<body>
+	<nav class="container">
+		<ul>
+			<li><strong>Website :)</strong></li>
+		</ul>
+		<ul>
+			<li><a href="/posts#">Posts</a></li>
+			<li><a href="/users/new#">Sign Up</a></li>
+			<li><a href="#">Link</a></li>
+		</ul>
+	</nav>
+	{{ template "main" . }}
+</body>
+
+</html>
+{{end}}

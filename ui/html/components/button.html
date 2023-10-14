@@ -1,0 +1,20 @@
+{{ define "edit-button" }}
+<div role="button" class="primary" hx-post="{{.EditPath}}/{{.ID}}" hx-target="#{{.Target}}-{{ .ID }}"
+	hx-swap="outerHTML" style="
+				padding: 0em;
+				border: none;
+				background: none;
+			">
+	edit
+</div>
+{{ end }}
+
+{{ define "delete-button" }}
+<div role="button" class="primary" hx-delete="{{.DeletePath}}/{{.ID}}" style="
+				padding: 0em;
+				border: none;
+				background: none;
+			">
+	delete
+</div>
+{{ end }}
