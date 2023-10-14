@@ -40,7 +40,7 @@ templ comment(c cmt.Data) {
 			margin-bottom: 0.75em;
 			padding-left:  1.0em;
 			padding-right: 0.0em;
-	"
+		"
 	>
 		<div class="desc primary" style="white-space: pre-wrap;">{ c.Description }</div>
 		<div
@@ -48,12 +48,7 @@ templ comment(c cmt.Data) {
  			hx-post={ fmt.Sprintf("/comment/update/%d", c.ID) }
  			hx-target={ fmt.Sprintf("#comment-%d", c.ID) }
  			hx-swap="outerHTML"
- 			style="
-				font-size: 0.8em;
-				padding: 0em;
-				border: none;
-				background: none;
-			"
+ 			style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
 		>
 			edit
 		</div>
@@ -62,12 +57,7 @@ templ comment(c cmt.Data) {
  			hx-delete={ fmt.Sprintf("/comment/delete/%d", c.ID) }
  			hx-target={ fmt.Sprintf("#comment-%d", c.ID ) }
  			hx-swap="outerHTML"
- 			style="
-				font-size: 0.8em;
-				padding: 0em;
-				border: none;
-				background: none;
-			"
+ 			style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
 		>
 			delete
 		</div>
@@ -88,38 +78,33 @@ templ replyBox(c cmt.Data) {
 			<div
  				role="button"
  				hx-trigger="click, hide from:body"
- 				hx-post="/reply/hide?id={{.ID}}"
- 				hx-target="#reply-box-{{.ID}}"
+ 				hx-post={ fmt.Sprintf("/reply/hide?id=%d", c.ID) }
+ 				hx-target={ fmt.Sprintf("#reply-box%d", c.ID) }
  				hx-swap="outerHTML"
- 				style="
-				font-size: 0.8em;
-				padding: 0em;
-				border: none;
-				background: none;
-			"
+ 				style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
 			>
 				hide
 			</div>
-			<form hx-post="/comment/reply/{{.ID}}" hx-target="#reply-list-{{.ID}}" hx-swap="beforeend">
+			<form
+ 				hx-post={ fmt.Sprintf("/comment/reply/%d", c.ID ) }
+ 				hx-target={ fmt.Sprintf("#reply-list-%d", c.ID ) }
+ 				hx-swap="beforeend"
+			>
 				<textarea id="add-comment" name="comment" placeholder="new reply..."></textarea>
 				<input type="submit" value="Add Comment"/>
 			</form>
 		</span>
+	} else {
+		<div
+ 			id={ fmt.Sprintf("reply-box%d", c.ID) }
+ 			role="button"
+ 			hx-post={ fmt.Sprintf("/reply/show?id=%d", c.ID) }
+ 			hx-target={ fmt.Sprintf("#reply-box-%d", c.ID) }
+ 			hx-swap="outerHTML"
+ 			style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
+		>
+			reply
+		</div>
 	}
-	<div
- 		id="reply-box-{{.ID}}"
- 		role="button"
- 		hx-post="/reply/show?id={{.ID}}"
- 		hx-target="#reply-box-{{.ID}}"
- 		hx-swap="outerHTML"
- 		style="
-				font-size: 0.8em;
-				padding: 0em;
-				border: none;
-				background: none;
-			"
-	>
-		reply
-	</div>
 }
 
