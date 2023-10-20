@@ -58,7 +58,7 @@ templ Comment(c CommentInput) {
  			hx-post={ fmt.Sprintf("/comment/update/%d", c.ID) }
  			hx-target={ fmt.Sprintf("#comment-%d", c.ID) }
  			hx-swap="outerHTML"
- 			style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
+ 			style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
 		>
 			edit
 		</div>
@@ -67,7 +67,7 @@ templ Comment(c CommentInput) {
  			hx-delete={ fmt.Sprintf("/comment/delete/%d", c.ID) }
  			hx-target={ fmt.Sprintf("#comment-%d", c.ID ) }
  			hx-swap="outerHTML"
- 			style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
+ 			style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
 		>
 			delete
 		</div>
@@ -83,15 +83,15 @@ templ Comment(c CommentInput) {
 }
 
 templ ReplyBox(id int, visible bool) {
-	if visible == false {
+	if visible == true {
 		<span id={ fmt.Sprintf("reply-box-%d", id) }>
 			<div
  				role="button"
  				hx-trigger="click, hide from:body"
  				hx-post={ fmt.Sprintf("/reply/hide?id=%d", id) }
- 				hx-target={ fmt.Sprintf("#reply-box%d", id) }
+ 				hx-target={ fmt.Sprintf("#reply-box-%d", id) }
  				hx-swap="outerHTML"
- 				style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
+ 				style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
 			>
 				hide
 			</div>
@@ -106,12 +106,12 @@ templ ReplyBox(id int, visible bool) {
 		</span>
 	} else {
 		<div
- 			id={ fmt.Sprintf("reply-box%d", id) }
+ 			id={ fmt.Sprintf("reply-box-%d", id) }
  			role="button"
  			hx-post={ fmt.Sprintf("/reply/show?id=%d", id) }
  			hx-target={ fmt.Sprintf("#reply-box-%d", id) }
  			hx-swap="outerHTML"
- 			style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
+ 			style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
 		>
 			reply
 		</div>
