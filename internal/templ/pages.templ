@@ -1,0 +1,52 @@
+package templ
+
+
+templ AllPosts(posts []PostInput) {
+	@Base() {
+		<main class="container">
+			<h1>Posts</h1>
+			<a role="button" href="/posts/new">Add Post</a>
+			@postPreviews(posts)
+		</main>
+	}
+}
+
+templ Post(post PostInput, comment []CommentInput) {
+	@Base() {
+		<main class="container">
+			@PostComponent(post)
+			@CommentComponent(post.ID, comment)
+		</main>
+	}
+}
+
+templ NewPost() {
+	<main class="container">
+		<form hx-post="/post/add">
+			<input type="text" name="title"/>
+			<textarea id="add-post" name="body" placeholder="body"></textarea>
+			<input type="submit" value="Add Post"/>
+			<input type="hidden" name="redirect" value="true"/>
+		</form>
+	</main>
+}
+
+templ NewUser() {
+	<main class="container">
+		<form hx-post="/user/add" hx-target="#error">
+			<input type="text" name="username"/>
+			<div hx-post="/user/checkpass">
+				<input type="password" name="password"/>
+				<input
+ 					type="password"
+ 					name="password-confirm"
+ 					hx-trigger="keyup changed delay:1s"
+ 					hx-target="#error"
+				/>
+			</div>
+			@PasswordsDoNotMatch(false)
+			<input type="submit" value="Create User Account"/>
+			<input type="hidden" name="redirect" value="true"/>
+		</form>
+	</main>
+}

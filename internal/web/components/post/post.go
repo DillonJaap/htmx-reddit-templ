@@ -1,31 +1,23 @@
 package post
 
 import (
+	"htmx-reddit/internal/adapter"
 	"htmx-reddit/internal/models/post"
-	"time"
+	"htmx-reddit/internal/templ"
 )
 
-type Data struct {
-	ID           int
-	Title        string
-	Body         string
-	TimeCreated  time.Time
-	DeleteButton deleteButton
-	EditButton   editButton
-}
-
-func AsViewData(dbPost post.Post) Data {
-	return Data{
+func AsViewData(dbPost post.Post) templ.PostInput {
+	return templ.PostInput{
 		ID:          dbPost.ID,
 		Title:       dbPost.Title,
 		Body:        dbPost.Body,
 		TimeCreated: dbPost.TimeCreated,
-		DeleteButton: deleteButton{
+		DeleteButton: templ.DeleteButtonInput{
 			ID:         dbPost.ID,
 			Target:     "post",
 			DeletePath: "/post/delete",
 		},
-		EditButton: editButton{
+		EditButton: templ.EditButtonInput{
 			ID:       dbPost.ID,
 			Target:   "post",
 			EditPath: "/post/edit",
@@ -33,11 +25,10 @@ func AsViewData(dbPost post.Post) Data {
 	}
 }
 
-func (data Data) asDBData() post.Post {
-	return post.Post{
-		ID:          data.ID,
-		Title:       data.Title,
-		Body:        data.Body,
-		TimeCreated: data.TimeCreated,
-	}
+func GetAll(model post.Model) ([]templ.PostInput, error) {
+	return adapter.GetAll("post", model.GetAll, AsViewData)()
+}
+
+func Get(model post.Model, id int) (templ.PostInput, error) {
+	return adapter.Get("post", model.Get, AsViewData)(id)
 }

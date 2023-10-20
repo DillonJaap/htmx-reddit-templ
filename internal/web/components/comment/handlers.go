@@ -1,9 +1,10 @@
 package comment
 
 import (
+	"context"
 	"htmx-reddit/internal/convert"
 	"htmx-reddit/internal/models/comment"
-	"htmx-reddit/internal/render"
+	"htmx-reddit/internal/templ"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -18,17 +19,17 @@ type Handler struct {
 	ShowReply httprouter.Handle
 }
 
-func New(comments comment.Model, renderer render.Renderer) *Handler {
+func New(comments comment.Model) *Handler {
 	return &Handler{
-		Add:       addEndpoint(comments, renderer),
-		Reply:     replyEndpoint(comments, renderer),
-		Delete:    deleteEndpoint(comments, renderer),
-		HideReply: hideReplyBox(renderer),
-		ShowReply: showReplyBox(renderer),
+		Add:       addEndpoint(comments),
+		Reply:     replyEndpoint(comments),
+		Delete:    deleteEndpoint(comments),
+		HideReply: hideReplyBox(),
+		ShowReply: showReplyBox(),
 	}
 }
 
-func addEndpoint(comments comment.Model, r render.Renderer) httprouter.Handle {
+func addEndpoint(comments comment.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		postID, err := convert.Int(req.FormValue("post-id"))
 		if err != nil {
@@ -52,11 +53,11 @@ func addEndpoint(comments comment.Model, r render.Renderer) httprouter.Handle {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		r.RenderComponent(w, http.StatusOK, "comment", asViewData(commentItem))
+		templ.Comment(asViewData(commentItem)).Render(context.TODO(), w)
 	}
 }
 
-func deleteEndpoint(comments comment.Model, r render.Renderer) httprouter.Handle {
+func deleteEndpoint(comments comment.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
@@ -75,7 +76,7 @@ func deleteEndpoint(comments comment.Model, r render.Renderer) httprouter.Handle
 	}
 }
 
-func replyEndpoint(comments comment.Model, r render.Renderer) httprouter.Handle {
+func replyEndpoint(comments comment.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		parent_id, err := convert.Int(p.ByName("id"))
 		if err != nil {
@@ -101,36 +102,22 @@ func replyEndpoint(comments comment.Model, r render.Renderer) httprouter.Handle 
 		}
 
 		w.Header().Add("HX-Trigger", "hide")
-		r.RenderComponent(w, http.StatusOK, "comment", asViewData(commentItem))
+		templ.Comment(asViewData(commentItem)).Render(context.TODO(), w)
 	}
 }
 
-func hideReplyBox(r render.Renderer) httprouter.Handle {
+func hideReplyBox() httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-		ID := req.URL.Query().Get("id")
-		strID, _ := convert.Int(ID)
-		r.RenderComponent(w, http.StatusOK, "reply-box", struct {
-			ReplyBoxVisible bool
-			ID              int
-		}{
-			ReplyBoxVisible: false,
-			ID:              strID,
-		},
-		)
+		strID := req.URL.Query().Get("id")
+		id, _ := convert.Int(strID)
+		templ.ReplyBox(id, false).Render(context.TODO(), w)
 	}
 }
 
-func showReplyBox(r render.Renderer) httprouter.Handle {
+func showReplyBox() httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-		ID := req.URL.Query().Get("id")
-		strID, _ := convert.Int(ID)
-		r.RenderComponent(w, http.StatusOK, "reply-box", struct {
-			ReplyBoxVisible bool
-			ID              int
-		}{
-			ReplyBoxVisible: true,
-			ID:              strID,
-		},
-		)
+		strID := req.URL.Query().Get("id")
+		id, _ := convert.Int(strID)
+		templ.ReplyBox(id, true).Render(context.TODO(), w)
 	}
 }

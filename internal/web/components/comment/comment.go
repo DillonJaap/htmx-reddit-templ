@@ -2,30 +2,14 @@ package comment
 
 import (
 	"htmx-reddit/internal/models/comment"
-	"time"
+
+	"htmx-reddit/internal/templ"
 
 	"github.com/charmbracelet/log"
 )
 
-type Data struct {
-	ID              int
-	ParentID        int
-	Description     string
-	TimeCreated     time.Time
-	Replies         []Data
-	ReplyBoxVisible bool
-}
-
-type Controller struct {
-	GetComments func() ([]Data, error)
-	GetReplies  func(int) []Data
-	Get         func(int) (Data, error)
-	Add         func(string, int) (int, error)
-	Delete      func(int) error
-}
-
-func asViewData(dbCmnt comment.Comment) Data {
-	return Data{
+func asViewData(dbCmnt comment.Comment) templ.CommentInput {
+	return templ.CommentInput{
 		ID:              dbCmnt.ID,
 		ParentID:        dbCmnt.ParentID,
 		Description:     dbCmnt.Description,
@@ -34,24 +18,14 @@ func asViewData(dbCmnt comment.Comment) Data {
 	}
 }
 
-func (data Data) asDBData() comment.Comment {
-	return comment.Comment{
-		ID:       data.ID,
-		ParentID: data.ParentID,
-		//PostID:      data.PostID, // TODO fill this in
-		Description: data.Description,
-		TimeCreated: data.TimeCreated,
-	}
-}
-
-func GetByParentID(model comment.Model, id int) []Data {
+func GetByParentID(model comment.Model, id int) []templ.CommentInput {
 	dbComments, err := model.GetByParentID(id)
 	if err != nil {
 		log.Error("getting comments", "error", err)
 		return nil
 	}
 
-	var comments []Data
+	var comments []templ.CommentInput
 
 	for _, dbCmnt := range dbComments {
 		comment := asViewData(dbCmnt)
@@ -62,14 +36,14 @@ func GetByParentID(model comment.Model, id int) []Data {
 	return comments
 }
 
-func GetByPostID(model comment.Model, id int) []Data {
+func GetByPostID(model comment.Model, id int) []templ.CommentInput {
 	dbComments, err := model.GetByPostID(id)
 	if err != nil {
 		log.Error("getting comments", "error", err)
 		return nil
 	}
 
-	var comments []Data
+	var comments []templ.CommentInput
 
 	for _, dbCmnt := range dbComments {
 		comment := asViewData(dbCmnt)

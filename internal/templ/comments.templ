@@ -1,14 +1,24 @@
 package templ
 
-import "fmt"
+import (
+		"fmt"
+		"time"
+)
 
-import cmt "htmx-reddit/internal/web/components/comment"
+type CommentInput struct {
+	ID              int
+	ParentID        int
+	Description     string
+	TimeCreated     time.Time
+	Replies         []CommentInput
+	ReplyBoxVisible bool
+}
 
-templ CommentComponent(comments []cmt.Data) {
+templ CommentComponent(PostID int, comments []CommentInput) {
 	<div id="comment-component" style="padding-top: 1em; padding-bottom: 1em;">
 		<form hx-post="/comment/add" hx-target="#comment-list" hx-swap="beforeend">
 			<textarea id="add-comment" name="comment" placeholder="new comment..."></textarea>
-			<input type="hidden" name="post-id" value="{{.Post.ID}}"/>
+			<input type="hidden" name="post-id" value={ fmt.Sprintf("%d", PostID) }/>
 			<input
  				type="submit"
  				value="Reply"
@@ -24,13 +34,13 @@ templ CommentComponent(comments []cmt.Data) {
 		<hr style="border-top: solid;"/>
 		<div id="comment-list">
 			for _, c := range comments {
-				@comment(c)
+				@Comment(c)
 			}
 		</div>
 	</div>
 }
 
-templ comment(c cmt.Data) {
+templ Comment(c CommentInput) {
 	<div
  		class="comment container"
  		id={ fmt.Sprintf("comment-%d", c.ID) }
@@ -61,33 +71,33 @@ templ comment(c cmt.Data) {
 		>
 			delete
 		</div>
-		@replyBox(c)
+		@ReplyBox(c.ID, false)
 		<div id={ fmt.Sprintf("reply-list-%d", c.ID) } style="padding-top: 0.6em">
 			if len(c.Replies) != 0 {
 				for _, reply := range c.Replies {
-					@comment(reply)
+					@Comment(reply)
 				}
 			}
 		</div>
 	</div>
 }
 
-templ replyBox(c cmt.Data) {
-	if c.ReplyBoxVisible == true {
-		<span id="reply-box-{{.ID}}">
+templ ReplyBox(id int, visible bool) {
+	if visible == false {
+		<span id={ fmt.Sprintf("reply-box-%d", id) }>
 			<div
  				role="button"
  				hx-trigger="click, hide from:body"
- 				hx-post={ fmt.Sprintf("/reply/hide?id=%d", c.ID) }
- 				hx-target={ fmt.Sprintf("#reply-box%d", c.ID) }
+ 				hx-post={ fmt.Sprintf("/reply/hide?id=%d", id) }
+ 				hx-target={ fmt.Sprintf("#reply-box%d", id) }
  				hx-swap="outerHTML"
  				style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
 			>
 				hide
 			</div>
 			<form
- 				hx-post={ fmt.Sprintf("/comment/reply/%d", c.ID ) }
- 				hx-target={ fmt.Sprintf("#reply-list-%d", c.ID ) }
+ 				hx-post={ fmt.Sprintf("/comment/reply/%d", id ) }
+ 				hx-target={ fmt.Sprintf("#reply-list-%d", id ) }
  				hx-swap="beforeend"
 			>
 				<textarea id="add-comment" name="comment" placeholder="new reply..."></textarea>
@@ -96,10 +106,10 @@ templ replyBox(c cmt.Data) {
 		</span>
 	} else {
 		<div
- 			id={ fmt.Sprintf("reply-box%d", c.ID) }
+ 			id={ fmt.Sprintf("reply-box%d", id) }
  			role="button"
- 			hx-post={ fmt.Sprintf("/reply/show?id=%d", c.ID) }
- 			hx-target={ fmt.Sprintf("#reply-box-%d", c.ID) }
+ 			hx-post={ fmt.Sprintf("/reply/show?id=%d", id) }
+ 			hx-target={ fmt.Sprintf("#reply-box-%d", id) }
  			hx-swap="outerHTML"
  			style=" font-size: 0.8em; padding: 0em; border: none; background: none; "
 		>

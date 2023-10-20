@@ -1,0 +1,10 @@
+package templ
+
+templ PasswordsDoNotMatch(doNotMatch bool) {
+	if doNotMatch {
+		<div id="error" class="primary">Passwords don't match</div>
+	} else {
+		<div id="error"></div>
+	}
+}
+

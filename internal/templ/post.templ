@@ -1,31 +1,86 @@
 package templ	
 
 import (
-	"htmx-reddit/internal/web/components/post"
+	"fmt"
+	"time"
 )
 
+type PostInput struct {
+	ID           int
+	Title        string
+	Body         string
+	TimeCreated  time.Time
+	DeleteButton DeleteButtonInput
+	EditButton   EditButtonInput
+}
 
-templ PostComponent(post post.Data) {
+type DeleteButtonInput struct {
+	ID         int
+	Target     string
+	DeletePath string
+}
+
+type EditButtonInput struct {
+	ID       int
+	Target   string
+	EditPath string
+}
+
+templ PostComponent(post PostInput) {
 	<div style="font-size: 2.0em;padding: 0em;">{ post.Title }</div>
-	<div class="container" style="
+	<div
+ 		class="container"
+ 		style="
 	border: ridge;
 	border-radius: 0.3em;
 	padding: 1.0em;
-	">
-	<p>{ post.Body }</p>
-	<!-- 
-	{{ template "edit-button" .EditButton }}
-	{{ template "delete-button" .DeleteButton }}
-	-->
+	"
+	>
+		<p>{ post.Body }</p>
+		@deleteButton(post.DeleteButton)
+		@editButton(post.EditButton)
 	</div>
 }
 
-
-templ Post(post post.Data) {
-	@Base() {
-		<main class="container">
-			@PostComponent(post)
-			<!--{ { template "comment-component" . } } -->
-		</main>
-	}
+templ deleteButton(post DeleteButtonInput) {
+	<div
+ 		role="button"
+ 		class="primary"
+ 		hx-delete={ fmt.Sprintf("%s/%d", post.DeletePath, post.ID) }
+ 		style="
+				padding: 4px;
+				border: none;
+				background: none;
+			"
+	>
+		delete
+	</div>
 }
+
+templ editButton(post EditButtonInput) {
+	<div
+ 		role="button"
+ 		class="primary"
+ 		hx-delete={ fmt.Sprintf("%s/%d", post.EditPath, post.ID) }
+ 		style="
+				padding: 4px;
+				border: none;
+				background: none;
+			"
+	>
+		edit
+	</div>
+}
+
+templ postPreviews(posts []PostInput) {
+	<div id="post-preview-list">
+		for _, post := range posts {
+			<blockquote>
+				<a href={ templ.URL(fmt.Sprintf("/post/%d", post.ID)) }>
+					{ post.Title }
+				</a>
+			</blockquote>
+		}
+	</div>
+}
+

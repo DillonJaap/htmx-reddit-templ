@@ -1,9 +1,10 @@
 package user
 
 import (
+	"context"
 	"htmx-reddit/internal/convert"
 	"htmx-reddit/internal/models/user"
-	"htmx-reddit/internal/render"
+	"htmx-reddit/internal/templ"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -16,20 +17,20 @@ type Handler struct {
 	CheckPass httprouter.Handle
 }
 
-func New(users user.Model, renderer render.Renderer) *Handler {
+func New(users user.Model) *Handler {
 	return &Handler{
-		Add:       addEndpoint(users, renderer),
-		Delete:    deleteEndpoint(users, renderer),
-		CheckPass: checkPassEndpoint(users, renderer),
+		Add:       addEndpoint(users),
+		Delete:    deleteEndpoint(users),
+		CheckPass: checkPassEndpoint(users),
 	}
 }
 
-func checkPassEndpoint(model user.Model, r render.Renderer) httprouter.Handle {
+func checkPassEndpoint(model user.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		pass := req.FormValue("password")
 		confirmPass := req.FormValue("password-confirm")
 		if pass != confirmPass {
-			r.RenderComponent(w, http.StatusOK, "pass-err", true)
+			templ.PasswordsDoNotMatch(true).Render(context.TODO(), w)
 			return
 		}
 
@@ -37,20 +38,20 @@ func checkPassEndpoint(model user.Model, r render.Renderer) httprouter.Handle {
 	}
 }
 
-func addEndpoint(model user.Model, r render.Renderer) httprouter.Handle {
+func addEndpoint(model user.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		// confirm password
 		pass := req.FormValue("password")
 		confirmPass := req.FormValue("password-confirm")
 		if pass != confirmPass {
-			r.RenderComponent(w, http.StatusOK, "pass-err", true)
+			templ.PasswordsDoNotMatch(true).Render(context.TODO(), w)
 			return
 		}
 
-		err := model.Add(UserData{
+		err := model.Add(user.User{
 			Name:     req.FormValue("username"),
 			Password: pass,
-		}.asDBData())
+		})
 		if err != nil {
 			log.Error("getting user id", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -64,7 +65,7 @@ func addEndpoint(model user.Model, r render.Renderer) httprouter.Handle {
 	}
 }
 
-func deleteEndpoint(user user.Model, r render.Renderer) httprouter.Handle {
+func deleteEndpoint(user user.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {

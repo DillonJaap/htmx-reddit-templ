@@ -3,7 +3,6 @@ package post
 import (
 	"htmx-reddit/internal/convert"
 	"htmx-reddit/internal/models/post"
-	"htmx-reddit/internal/render"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -15,19 +14,19 @@ type Handler struct {
 	Delete httprouter.Handle
 }
 
-func New(posts post.Model, renderer render.Renderer) *Handler {
+func New(posts post.Model) *Handler {
 	return &Handler{
-		Add:    addEndpoint(posts, renderer),
-		Delete: deleteEndpoint(posts, renderer),
+		Add:    addEndpoint(posts),
+		Delete: deleteEndpoint(posts),
 	}
 }
 
-func addEndpoint(model post.Model, r render.Renderer) httprouter.Handle {
+func addEndpoint(model post.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-		_, err := model.Add(Data{
+		_, err := model.Add(post.Post{
 			Title: req.FormValue("title"),
 			Body:  req.FormValue("body"),
-		}.asDBData())
+		})
 		if err != nil {
 			log.Error("getting post id", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -41,7 +40,7 @@ func addEndpoint(model post.Model, r render.Renderer) httprouter.Handle {
 	}
 }
 
-func deleteEndpoint(posts post.Model, r render.Renderer) httprouter.Handle {
+func deleteEndpoint(posts post.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {

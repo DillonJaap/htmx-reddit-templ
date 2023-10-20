@@ -5,7 +5,6 @@ import (
 	"htmx-reddit/internal/models/comment"
 	"htmx-reddit/internal/models/post"
 	"htmx-reddit/internal/models/user"
-	"htmx-reddit/internal/render"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -33,7 +32,6 @@ func main() {
 		post.New(db),
 		comment.New(db),
 		user.New(db),
-		render.New(),
 	)
 
 	log.Fatal(

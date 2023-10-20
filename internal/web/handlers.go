@@ -4,7 +4,6 @@ import (
 	"htmx-reddit/internal/models/comment"
 	"htmx-reddit/internal/models/post"
 	"htmx-reddit/internal/models/user"
-	"htmx-reddit/internal/render"
 	cmntHandler "htmx-reddit/internal/web/components/comment"
 	postHandler "htmx-reddit/internal/web/components/post"
 	userHandler "htmx-reddit/internal/web/components/user"
@@ -20,11 +19,10 @@ func New(
 	comments comment.Model,
 	posts post.Model,
 	users user.Model,
-	renderer render.Renderer,
 ) *Handler {
 	return &Handler{
-		Comment: cmntHandler.New(comments, renderer),
-		Post:    postHandler.New(posts, renderer),
-		User:    userHandler.New(users, renderer),
+		Comment: cmntHandler.New(comments),
+		Post:    postHandler.New(posts),
+		User:    userHandler.New(users),
 	}
 }

@@ -4,7 +4,6 @@ import (
 	commentDB "htmx-reddit/internal/models/comment"
 	postDB "htmx-reddit/internal/models/post"
 	userDB "htmx-reddit/internal/models/user"
-	"htmx-reddit/internal/render"
 	handlers "htmx-reddit/internal/web"
 	"htmx-reddit/internal/web/pages"
 	"net/http"
@@ -18,13 +17,12 @@ func routes(
 	postModel postDB.Model,
 	cmntModel commentDB.Model,
 	userModel userDB.Model,
-	renderer render.Renderer,
 ) {
 	// CSS
 	r.ServeFiles("/css/*filepath", http.Dir("./ui/css/"))
 
 	// pages
-	pages := pages.New(cmntModel, postModel, userModel, renderer)
+	pages := pages.New(cmntModel, postModel, userModel)
 	r.GET("/", pages.Home)
 	r.GET("/posts", pages.AllPosts)
 	r.GET("/posts/new", pages.NewPost)
@@ -32,7 +30,7 @@ func routes(
 	r.GET("/users/new", pages.NewUser)
 
 	// partial htmx data
-	handler := handlers.New(cmntModel, postModel, userModel, renderer)
+	handler := handlers.New(cmntModel, postModel, userModel)
 	r.POST("/comment/add", handler.Comment.Add)
 	r.DELETE("/comment/delete/:id", handler.Comment.Delete)
 	r.POST("/comment/reply/:id", handler.Comment.Reply)
