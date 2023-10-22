@@ -1,7 +1,7 @@
 package user
 
 import (
-	"htmx-reddit/internal/models/user"
+	"htmx-reddit/internal/db/user"
 	"time"
 )
 

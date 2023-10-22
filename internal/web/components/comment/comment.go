@@ -1,7 +1,7 @@
 package comment
 
 import (
-	"htmx-reddit/internal/models/comment"
+	"htmx-reddit/internal/db/comment"
 
 	"htmx-reddit/internal/templ"
 

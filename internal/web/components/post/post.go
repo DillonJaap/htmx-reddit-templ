@@ -2,7 +2,7 @@ package post
 
 import (
 	"htmx-reddit/internal/adapter"
-	"htmx-reddit/internal/models/post"
+	"htmx-reddit/internal/db/post"
 	"htmx-reddit/internal/templ"
 )
 

@@ -3,9 +3,9 @@ package pages
 import (
 	"context"
 	"htmx-reddit/internal/convert"
-	"htmx-reddit/internal/models/comment"
-	"htmx-reddit/internal/models/post"
-	"htmx-reddit/internal/models/user"
+	"htmx-reddit/internal/db/comment"
+	"htmx-reddit/internal/db/post"
+	"htmx-reddit/internal/db/user"
 	"htmx-reddit/internal/templ"
 	webCmt "htmx-reddit/internal/web/components/comment"
 	webPost "htmx-reddit/internal/web/components/post"
@@ -60,7 +60,6 @@ func newUser() httprouter.Handle {
 		}
 		pageData.ShowPassErr = false
 		templ.NewUser().Render(context.TODO(), w)
-
 	}
 }
 

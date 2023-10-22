@@ -1,9 +1,9 @@
 package main
 
 import (
-	commentDB "htmx-reddit/internal/models/comment"
-	postDB "htmx-reddit/internal/models/post"
-	userDB "htmx-reddit/internal/models/user"
+	commentDB "htmx-reddit/internal/db/comment"
+	postDB "htmx-reddit/internal/db/post"
+	userDB "htmx-reddit/internal/db/user"
 	handlers "htmx-reddit/internal/web"
 	"htmx-reddit/internal/web/pages"
 	"net/http"

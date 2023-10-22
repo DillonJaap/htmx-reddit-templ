@@ -3,7 +3,7 @@ package comment
 import (
 	"context"
 	"htmx-reddit/internal/convert"
-	"htmx-reddit/internal/models/comment"
+	"htmx-reddit/internal/db/comment"
 	"htmx-reddit/internal/templ"
 	"net/http"
 
@@ -21,15 +21,15 @@ type Handler struct {
 
 func New(comments comment.Model) *Handler {
 	return &Handler{
-		Add:       addEndpoint(comments),
-		Reply:     replyEndpoint(comments),
-		Delete:    deleteEndpoint(comments),
+		Add:       add(comments),
+		Reply:     reply(comments),
+		Delete:    delete(comments),
 		HideReply: hideReplyBox(),
 		ShowReply: showReplyBox(),
 	}
 }
 
-func addEndpoint(comments comment.Model) httprouter.Handle {
+func add(comments comment.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		postID, err := convert.Int(req.FormValue("post-id"))
 		if err != nil {
@@ -57,7 +57,7 @@ func addEndpoint(comments comment.Model) httprouter.Handle {
 	}
 }
 
-func deleteEndpoint(comments comment.Model) httprouter.Handle {
+func delete(comments comment.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
@@ -76,7 +76,7 @@ func deleteEndpoint(comments comment.Model) httprouter.Handle {
 	}
 }
 
-func replyEndpoint(comments comment.Model) httprouter.Handle {
+func reply(comments comment.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		parent_id, err := convert.Int(p.ByName("id"))
 		if err != nil {

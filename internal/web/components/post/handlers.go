@@ -2,7 +2,7 @@ package post
 
 import (
 	"htmx-reddit/internal/convert"
-	"htmx-reddit/internal/models/post"
+	"htmx-reddit/internal/db/post"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -16,12 +16,12 @@ type Handler struct {
 
 func New(posts post.Model) *Handler {
 	return &Handler{
-		Add:    addEndpoint(posts),
-		Delete: deleteEndpoint(posts),
+		Add:    add(posts),
+		Delete: delete(posts),
 	}
 }
 
-func addEndpoint(model post.Model) httprouter.Handle {
+func add(model post.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		_, err := model.Add(post.Post{
 			Title: req.FormValue("title"),
@@ -40,7 +40,7 @@ func addEndpoint(model post.Model) httprouter.Handle {
 	}
 }
 
-func deleteEndpoint(posts post.Model) httprouter.Handle {
+func delete(posts post.Model) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {

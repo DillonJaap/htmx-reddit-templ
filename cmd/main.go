@@ -2,9 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"htmx-reddit/internal/models/comment"
-	"htmx-reddit/internal/models/post"
-	"htmx-reddit/internal/models/user"
+	"htmx-reddit/internal/db/comment"
+	"htmx-reddit/internal/db/post"
+	"htmx-reddit/internal/db/user"
 	"net/http"
 
 	"github.com/charmbracelet/log"
