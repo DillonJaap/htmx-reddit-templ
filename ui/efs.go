@@ -4,5 +4,5 @@ import (
 	"embed"
 )
 
-//go:embed "html" "css"
+//go:embed "css"
 var Files embed.FS
