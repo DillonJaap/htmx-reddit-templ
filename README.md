@@ -7,3 +7,4 @@
 - [ ] tailwind
 - [ ] authentication middleware so you can actaully log in
 - [ ] sessions or cookies
+- [ ] goqu library?

@@ -5,7 +5,7 @@ import (
 	"htmx-reddit/internal/service"
 )
 
-templ CommentComponent(PostID int, comments []service.Comment) {
+templ CommentComponent(PostID int, comments []service.CommentData) {
 	<div id="comment-component" style="padding-top: 1em; padding-bottom: 1em;">
 		<form hx-post="/comment/add" hx-target="#comment-list" hx-swap="beforeend">
 			<textarea id="add-comment" name="comment" placeholder="new comment..."></textarea>
@@ -31,7 +31,7 @@ templ CommentComponent(PostID int, comments []service.Comment) {
 	</div>
 }
 
-templ Comment(c service.Comment) {
+templ Comment(c service.CommentData) {
 	<div
  		class="comment container"
  		id={ fmt.Sprintf("comment-%d", c.ID) }

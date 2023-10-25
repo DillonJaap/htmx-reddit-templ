@@ -2,7 +2,7 @@ package main
 
 import (
 	"htmx-reddit/internal/service"
-	handlers "htmx-reddit/internal/web"
+	"htmx-reddit/internal/web/components"
 	"htmx-reddit/internal/web/pages"
 	"net/http"
 
@@ -20,7 +20,7 @@ func routes(
 	r.ServeFiles("/css/*filepath", http.Dir("./ui/css/"))
 
 	// pages
-	pages := pages.New(commentService, postService, userService)
+	pages := pages.NewHandler(commentService, postService, userService)
 	r.GET("/", pages.Home)
 	r.GET("/posts", pages.AllPosts)
 	r.GET("/posts/new", pages.NewPost)
@@ -28,15 +28,15 @@ func routes(
 	r.GET("/users/new", pages.NewUser)
 
 	// partial htmx data
-	handler := handlers.New(commentService, postService, userService)
-	r.POST("/comment/add", handler.Comment.Add)
-	r.DELETE("/comment/delete/:id", handler.Comment.Delete)
-	r.POST("/comment/reply/:id", handler.Comment.Reply)
-	r.POST("/reply/show", handler.Comment.ShowReply)
-	r.POST("/reply/hide", handler.Comment.HideReply)
+	components := components.NewHandler(commentService, postService, userService)
+	r.POST("/comment/add", components.Comment.Add)
+	r.DELETE("/comment/delete/:id", components.Comment.Delete)
+	r.POST("/comment/reply/:id", components.Comment.Reply)
+	r.POST("/reply/show", components.Comment.ShowReply)
+	r.POST("/reply/hide", components.Comment.HideReply)
 
-	r.POST("/post/add", handler.Post.Add)
-	r.DELETE("/post/delete/:id", handler.Post.Delete)
+	r.POST("/post/add", components.Post.Add)
+	r.DELETE("/post/delete/:id", components.Post.Delete)
 
-	r.POST("/user/add", handler.User.Add)
+	r.POST("/user/add", components.User.Add)
 }
