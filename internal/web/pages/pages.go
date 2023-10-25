@@ -3,13 +3,8 @@ package pages
 import (
 	"context"
 	"htmx-reddit/internal/convert"
-	"htmx-reddit/internal/db/comment"
-	"htmx-reddit/internal/db/post"
-	"htmx-reddit/internal/db/user"
 	"htmx-reddit/internal/service"
 	"htmx-reddit/internal/templ"
-	webCmt "htmx-reddit/internal/web/components/comment"
-	webPost "htmx-reddit/internal/web/components/post"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -25,9 +20,9 @@ type Pages struct {
 }
 
 func New(
-	c comment.Model,
-	p post.Model,
-	u user.Model,
+	c service.Comment,
+	p service.Post,
+	u service.User,
 ) *Pages {
 	return &Pages{
 		AllPosts: allPosts(p),
@@ -37,7 +32,7 @@ func New(
 	}
 }
 
-func allPosts(ps service.PostService) httprouter.Handle {
+func allPosts(ps service.Post) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		postList, err := ps.GetAll()
 		if err != nil {
@@ -64,19 +59,19 @@ func newUser() httprouter.Handle {
 	}
 }
 
-func postPage(postModel post.Model, cmtModel comment.Model) httprouter.Handle {
+func postPage(postService service.Post, commentService service.Comment) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
 			log.Error("failed to convert to int", "error", err)
 		}
 
-		posts, err := webPost.Get(postModel, id)
+		post, err := postService.Get(id)
 		if err != nil {
 			log.Error("failed to get posts", "error", err)
 		}
 
-		comments := webCmt.GetByPostID(cmtModel, posts.ID)
-		templ.Post(posts, comments).Render(context.TODO(), w)
+		comments := commentService.GetByPostID(post.ID)
+		templ.Post(post, comments).Render(context.TODO(), w)
 	}
 }

@@ -3,7 +3,7 @@ package comment
 import (
 	"context"
 	"htmx-reddit/internal/convert"
-	"htmx-reddit/internal/db/comment"
+	"htmx-reddit/internal/service"
 	"htmx-reddit/internal/templ"
 	"net/http"
 
@@ -19,7 +19,7 @@ type Handler struct {
 	ShowReply httprouter.Handle
 }
 
-func New(comments comment.Model) *Handler {
+func New(comments service.Comment) *Handler {
 	return &Handler{
 		Add:       add(comments),
 		Reply:     reply(comments),
@@ -29,7 +29,7 @@ func New(comments comment.Model) *Handler {
 	}
 }
 
-func add(comments comment.Model) httprouter.Handle {
+func add(svc service.Comment) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		postID, err := convert.Int(req.FormValue("post-id"))
 		if err != nil {
@@ -37,27 +37,27 @@ func add(comments comment.Model) httprouter.Handle {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		id, err := comments.Add(comment.Comment{
-			ParentID:    postID,
-			Description: req.FormValue("comment"),
-		})
+		id, err := svc.Add(
+			postID,
+			req.FormValue("comment"),
+		)
 		if err != nil {
 			log.Error("getting comment id", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		commentItem, err := comments.Get(id)
+		comment, err := svc.Get(id)
 		if err != nil {
 			log.Error("quering comment", "error", err, "id", id)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		templ.Comment(asViewData(commentItem)).Render(context.TODO(), w)
+		templ.Comment(comment).Render(context.TODO(), w)
 	}
 }
 
-func delete(comments comment.Model) httprouter.Handle {
+func delete(svc service.Comment) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
@@ -66,7 +66,7 @@ func delete(comments comment.Model) httprouter.Handle {
 			return
 		}
 
-		if err = comments.Delete(int(id)); err != nil {
+		if err = svc.Delete(int(id)); err != nil {
 			log.Error("could't delete comment", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -76,7 +76,7 @@ func delete(comments comment.Model) httprouter.Handle {
 	}
 }
 
-func reply(comments comment.Model) httprouter.Handle {
+func reply(svc service.Comment) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		parent_id, err := convert.Int(p.ByName("id"))
 		if err != nil {
@@ -84,17 +84,17 @@ func reply(comments comment.Model) httprouter.Handle {
 			return
 		}
 
-		id, err := comments.Add(comment.Comment{
-			ParentID:    parent_id,
-			Description: req.FormValue("comment"),
-		})
+		id, err := svc.Add(
+			parent_id,
+			req.FormValue("comment"),
+		)
 		if err != nil {
 			log.Error("getting comment id", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		commentItem, err := comments.Get(id)
+		comment, err := svc.Get(id)
 		if err != nil {
 			log.Error("quering comment", "error", err, "id", id)
 			w.WriteHeader(http.StatusBadRequest)
@@ -102,7 +102,7 @@ func reply(comments comment.Model) httprouter.Handle {
 		}
 
 		w.Header().Add("HX-Trigger", "hide")
-		templ.Comment(asViewData(commentItem)).Render(context.TODO(), w)
+		templ.Comment(comment).Render(context.TODO(), w)
 	}
 }
 

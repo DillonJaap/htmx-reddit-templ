@@ -1,6 +1,9 @@
 # TODO
-- [ ] add code for posts and update views
-- [ ] add users
+- [x] add code for update views
+- [x] add users
 - [ ] add subreddits
-- [ ] consistent structure
-- [ ] should the handler logic be at the same level as the controller?
+- [x] consistent structure
+- [x] should the handler logic be at the same level as the controller?
+- [ ] tailwind
+- [ ] authentication middleware so you can actaully log in
+- [ ] sessions or cookies

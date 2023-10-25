@@ -2,7 +2,7 @@ package post
 
 import (
 	"htmx-reddit/internal/convert"
-	"htmx-reddit/internal/db/post"
+	"htmx-reddit/internal/service"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -14,19 +14,19 @@ type Handler struct {
 	Delete httprouter.Handle
 }
 
-func New(posts post.Model) *Handler {
+func New(posts service.Post) *Handler {
 	return &Handler{
 		Add:    add(posts),
 		Delete: delete(posts),
 	}
 }
 
-func add(model post.Model) httprouter.Handle {
+func add(svc service.Post) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-		_, err := model.Add(post.Post{
-			Title: req.FormValue("title"),
-			Body:  req.FormValue("body"),
-		})
+		err := svc.Add(
+			req.FormValue("title"),
+			req.FormValue("body"),
+		)
 		if err != nil {
 			log.Error("getting post id", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -40,7 +40,7 @@ func add(model post.Model) httprouter.Handle {
 	}
 }
 
-func delete(posts post.Model) httprouter.Handle {
+func delete(svc service.Post) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
@@ -49,7 +49,7 @@ func delete(posts post.Model) httprouter.Handle {
 			return
 		}
 
-		if err = posts.Delete(int(id)); err != nil {
+		if err = svc.Delete(int(id)); err != nil {
 			log.Error("could't delete post", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return

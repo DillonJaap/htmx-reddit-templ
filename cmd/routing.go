@@ -1,9 +1,7 @@
 package main
 
 import (
-	commentDB "htmx-reddit/internal/db/comment"
-	postDB "htmx-reddit/internal/db/post"
-	userDB "htmx-reddit/internal/db/user"
+	"htmx-reddit/internal/service"
 	handlers "htmx-reddit/internal/web"
 	"htmx-reddit/internal/web/pages"
 	"net/http"
@@ -14,15 +12,15 @@ import (
 // TODO route consts that are passed to the template?
 func routes(
 	r *httprouter.Router,
-	postModel postDB.Model,
-	cmntModel commentDB.Model,
-	userModel userDB.Model,
+	postService service.Post,
+	commentService service.Comment,
+	userService service.User,
 ) {
 	// CSS
 	r.ServeFiles("/css/*filepath", http.Dir("./ui/css/"))
 
 	// pages
-	pages := pages.New(cmntModel, postModel, userModel)
+	pages := pages.New(commentService, postService, userService)
 	r.GET("/", pages.Home)
 	r.GET("/posts", pages.AllPosts)
 	r.GET("/posts/new", pages.NewPost)
@@ -30,7 +28,7 @@ func routes(
 	r.GET("/users/new", pages.NewUser)
 
 	// partial htmx data
-	handler := handlers.New(cmntModel, postModel, userModel)
+	handler := handlers.New(commentService, postService, userService)
 	r.POST("/comment/add", handler.Comment.Add)
 	r.DELETE("/comment/delete/:id", handler.Comment.Delete)
 	r.POST("/comment/reply/:id", handler.Comment.Reply)

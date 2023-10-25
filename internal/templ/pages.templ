@@ -12,11 +12,11 @@ templ AllPosts(posts []service.Post) {
 	}
 }
 
-templ Post(post PostInput, comment []CommentInput) {
+templ Post(post service.Post, comment []service.Comment) {
 	@Base() {
 		<main class="container">
 			@PostComponent(post)
-			@CommentComponent(post.Post.ID, comment)
+			@CommentComponent(post.ID, comment)
 		</main>
 	}
 }

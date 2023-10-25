@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"htmx-reddit/internal/db/comment"
-	"htmx-reddit/internal/db/post"
-	"htmx-reddit/internal/db/user"
+	"htmx-reddit/internal/service"
 	cmntHandler "htmx-reddit/internal/web/components/comment"
 	postHandler "htmx-reddit/internal/web/components/post"
 	userHandler "htmx-reddit/internal/web/components/user"
@@ -16,9 +14,9 @@ type Handler struct {
 }
 
 func New(
-	comments comment.Model,
-	posts post.Model,
-	users user.Model,
+	comments service.Comment,
+	posts service.Post,
+	users service.User,
 ) *Handler {
 	return &Handler{
 		Comment: cmntHandler.New(comments),

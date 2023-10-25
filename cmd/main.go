@@ -2,9 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"htmx-reddit/internal/db/comment"
-	"htmx-reddit/internal/db/post"
-	"htmx-reddit/internal/db/user"
+	"htmx-reddit/internal/db"
+	"htmx-reddit/internal/service"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -20,8 +19,8 @@ const (
 func main() {
 	router := httprouter.New()
 
-	// db connection
-	db, err := sql.Open("sqlite3", dbFile)
+	// sqlDB connection
+	sqlDB, err := sql.Open("sqlite3", dbFile)
 	if err != nil {
 		log.Fatal("opening db", "error", err)
 	}
@@ -29,9 +28,9 @@ func main() {
 	// setup routes
 	routes(
 		router,
-		post.New(db),
-		comment.New(db),
-		user.New(db),
+		service.NewPost(db.NewPostStore(sqlDB)),
+		service.NewComment(db.NewCommentStore(sqlDB)),
+		service.NewUser(db.NewUserStore(sqlDB)),
 	)
 
 	log.Fatal(

@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"htmx-reddit/internal/convert"
-	"htmx-reddit/internal/db/user"
+	"htmx-reddit/internal/service"
 	"htmx-reddit/internal/templ"
 	"net/http"
 
@@ -17,7 +17,7 @@ type Handler struct {
 	CheckPass httprouter.Handle
 }
 
-func New(users user.Model) *Handler {
+func New(users service.User) *Handler {
 	return &Handler{
 		Add:       add(users),
 		Delete:    delete(users),
@@ -25,7 +25,7 @@ func New(users user.Model) *Handler {
 	}
 }
 
-func checkPassword(model user.Model) httprouter.Handle {
+func checkPassword(model service.User) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		pass := req.FormValue("password")
 		confirmPass := req.FormValue("password-confirm")
@@ -38,7 +38,7 @@ func checkPassword(model user.Model) httprouter.Handle {
 	}
 }
 
-func add(model user.Model) httprouter.Handle {
+func add(model service.User) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		// confirm password
 		pass := req.FormValue("password")
@@ -48,10 +48,7 @@ func add(model user.Model) httprouter.Handle {
 			return
 		}
 
-		err := model.Add(user.User{
-			Name:     req.FormValue("username"),
-			Password: pass,
-		})
+		err := model.Add(req.FormValue("username"), pass)
 		if err != nil {
 			log.Error("getting user id", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -65,7 +62,7 @@ func add(model user.Model) httprouter.Handle {
 	}
 }
 
-func delete(user user.Model) httprouter.Handle {
+func delete(user service.User) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
