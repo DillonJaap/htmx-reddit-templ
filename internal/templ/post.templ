@@ -2,31 +2,11 @@ package templ
 
 import (
 	"fmt"
-	"time"
+	"htmx-reddit/internal/service"
 )
 
-type PostInput struct {
-	ID           int
-	Title        string
-	Body         string
-	TimeCreated  time.Time
-	DeleteButton DeleteButtonInput
-	EditButton   EditButtonInput
-}
 
-type DeleteButtonInput struct {
-	ID         int
-	Target     string
-	DeletePath string
-}
-
-type EditButtonInput struct {
-	ID       int
-	Target   string
-	EditPath string
-}
-
-templ PostComponent(post PostInput) {
+templ PostComponent(post service.Post) {
 	<div style="font-size: 2.0em;padding: 0em;">{ post.Title }</div>
 	<div
  		class="container"
@@ -37,16 +17,16 @@ templ PostComponent(post PostInput) {
 	"
 	>
 		<p>{ post.Body }</p>
-		@deleteButton(post.DeleteButton)
-		@editButton(post.EditButton)
+		@deleteButton(post.ID)
+		@editButton(post.ID)
 	</div>
 }
 
-templ deleteButton(post DeleteButtonInput) {
+templ deleteButton(postID int) {
 	<div
  		role="button"
  		class="primary"
- 		hx-delete={ fmt.Sprintf("%s/%d", post.DeletePath, post.ID) }
+ 		hx-delete={ fmt.Sprintf("post/delete/%d", postID) }
  		style="
 				padding: 4px;
 				border: none;
@@ -57,11 +37,11 @@ templ deleteButton(post DeleteButtonInput) {
 	</div>
 }
 
-templ editButton(post EditButtonInput) {
+templ editButton(postID int) {
 	<div
  		role="button"
  		class="primary"
- 		hx-delete={ fmt.Sprintf("%s/%d", post.EditPath, post.ID) }
+ 		hx-delete={ fmt.Sprintf("post/update/%d", postID) }
  		style="
 				padding: 4px;
 				border: none;
@@ -72,7 +52,7 @@ templ editButton(post EditButtonInput) {
 	</div>
 }
 
-templ postPreviews(posts []PostInput) {
+templ postPreviews(posts []service.Post) {
 	<div id="post-preview-list">
 		for _, post := range posts {
 			<blockquote>

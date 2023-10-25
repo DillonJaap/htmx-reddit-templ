@@ -1,6 +1,8 @@
 package templ
 
-templ AllPosts(posts []PostInput) {
+import "htmx-reddit/internal/service"
+
+templ AllPosts(posts []service.Post) {
 	@Base() {
 		<main class="container">
 			<h1>Posts</h1>
@@ -14,7 +16,7 @@ templ Post(post PostInput, comment []CommentInput) {
 	@Base() {
 		<main class="container">
 			@PostComponent(post)
-			@CommentComponent(post.ID, comment)
+			@CommentComponent(post.Post.ID, comment)
 		</main>
 	}
 }

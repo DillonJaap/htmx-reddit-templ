@@ -24,6 +24,7 @@ func asDBPost(dbPost post.Post) Post {
 
 type PostService interface {
 	Get(int) (Post, error)
+	GetAll() ([]Post, error)
 	Delete(int) error
 	Add(title, body string) error
 }
@@ -32,8 +33,16 @@ type postService struct {
 	m post.Model
 }
 
+func NewPostService(m post.Model) PostService {
+	return postService{m: m}
+}
+
 func (ps postService) Get(id int) (Post, error) {
 	return adapter.Get("post", ps.m.Get, asDBPost)(id)
+}
+
+func (ps postService) GetAll() ([]Post, error) {
+	return adapter.GetAll("post", ps.m.GetAll, asDBPost)()
 }
 
 func (ps postService) Delete(id int) error {

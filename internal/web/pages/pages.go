@@ -6,6 +6,7 @@ import (
 	"htmx-reddit/internal/db/comment"
 	"htmx-reddit/internal/db/post"
 	"htmx-reddit/internal/db/user"
+	"htmx-reddit/internal/service"
 	"htmx-reddit/internal/templ"
 	webCmt "htmx-reddit/internal/web/components/comment"
 	webPost "htmx-reddit/internal/web/components/post"
@@ -36,9 +37,9 @@ func New(
 	}
 }
 
-func allPosts(model post.Model) httprouter.Handle {
+func allPosts(ps service.PostService) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-		postList, err := webPost.GetAll(model)
+		postList, err := ps.GetAll()
 		if err != nil {
 			log.Error("failed to get posts", "error", err)
 		}
