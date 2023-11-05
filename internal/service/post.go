@@ -30,27 +30,23 @@ type Post interface {
 }
 
 type post struct {
-	m db.PostStore
+	db.PostStore // use PostStore methods unless specifically overridden
 }
 
 func NewPost(m db.PostStore) Post {
-	return post{m: m}
+	return post{PostStore: m}
 }
 
 func (ps post) Get(id int) (PostData, error) {
-	return adapter.Get("post", ps.m.Get, asPostData)(id)
+	return adapter.Get("post", ps.PostStore.Get, asPostData)(id)
 }
 
 func (ps post) GetAll() ([]PostData, error) {
-	return adapter.GetAll("post", ps.m.GetAll, asPostData)()
-}
-
-func (ps post) Delete(id int) error {
-	return ps.m.Delete(id)
+	return adapter.GetAll("post", ps.PostStore.GetAll, asPostData)()
 }
 
 func (ps post) Add(title, body string) error {
-	_, err := ps.m.Add(db.Post{
+	_, err := ps.PostStore.Add(db.Post{
 		Title: title,
 		Body:  body,
 	})

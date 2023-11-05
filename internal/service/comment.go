@@ -35,34 +35,30 @@ type Comment interface {
 }
 
 type comment struct {
-	model db.CommentStore
+	db.CommentStore // use CommentStore methods unless specifically overridden
 }
 
 func NewComment(m db.CommentStore) Comment {
-	return comment{model: m}
+	return comment{CommentStore: m}
 }
 
 func (cs comment) Get(id int) (CommentData, error) {
-	return adapter.Get("comment", cs.model.Get, asCommentData)(id)
+	return adapter.Get("comment", cs.CommentStore.Get, asCommentData)(id)
 }
 
 func (cs comment) GetAll() ([]CommentData, error) {
-	return adapter.GetAll("comment", cs.model.GetAll, asCommentData)()
-}
-
-func (cs comment) Delete(id int) error {
-	return cs.model.Delete(id)
+	return adapter.GetAll("comment", cs.CommentStore.GetAll, asCommentData)()
 }
 
 func (cs comment) Add(parentID int, desc string) (int, error) {
-	return cs.model.Add(db.Comment{
+	return cs.CommentStore.Add(db.Comment{
 		ParentID:    parentID,
 		Description: desc,
 	})
 }
 
 func (cs comment) GetByParentID(id int) []CommentData {
-	dbComments, err := cs.model.GetByParentID(id)
+	dbComments, err := cs.CommentStore.GetByParentID(id)
 	if err != nil {
 		log.Error("getting comments", "error", err)
 		return nil
@@ -80,7 +76,7 @@ func (cs comment) GetByParentID(id int) []CommentData {
 }
 
 func (cs comment) GetByPostID(id int) []CommentData {
-	dbComments, err := cs.model.GetByPostID(id)
+	dbComments, err := cs.CommentStore.GetByPostID(id)
 	if err != nil {
 		log.Error("getting comments", "error", err)
 		return nil
