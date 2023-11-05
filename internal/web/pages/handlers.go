@@ -12,11 +12,11 @@ import (
 )
 
 type Handler struct {
-	Home     httprouter.Handle
-	Post     httprouter.Handle
-	AllPosts httprouter.Handle
-	NewPost  httprouter.Handle
-	NewUser  httprouter.Handle
+	Home     http.HandlerFunc
+	Post     http.HandlerFunc
+	AllPosts http.HandlerFunc
+	NewPost  http.HandlerFunc
+	NewUser  http.HandlerFunc
 }
 
 func NewHandler(
@@ -25,6 +25,7 @@ func NewHandler(
 	u service.User,
 ) *Handler {
 	return &Handler{
+		Home:     allPosts(p),
 		AllPosts: allPosts(p),
 		Post:     postPage(p, c),
 		NewPost:  newPost(),
@@ -32,8 +33,8 @@ func NewHandler(
 	}
 }
 
-func allPosts(ps service.Post) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func allPosts(ps service.Post) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		postList, err := ps.GetAll()
 		if err != nil {
 			log.Error("failed to get posts", "error", err)
@@ -43,14 +44,14 @@ func allPosts(ps service.Post) httprouter.Handle {
 	}
 }
 
-func newPost() httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func newPost() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		templ.NewPost().Render(context.TODO(), w)
 	}
 }
 
-func newUser() httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func newUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		var pageData struct {
 			ShowPassErr bool
 		}
@@ -59,8 +60,9 @@ func newUser() httprouter.Handle {
 	}
 }
 
-func postPage(postService service.Post, commentService service.Comment) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func postPage(postService service.Post, commentService service.Comment) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		p := httprouter.ParamsFromContext(req.Context())
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
 			log.Error("failed to convert to int", "error", err)

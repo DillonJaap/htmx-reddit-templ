@@ -25,26 +25,23 @@ type User interface {
 	Get(int) (UserData, error)
 	Delete(int) error
 	Add(string, string) error
+	Exists(id int) (bool, error)
 }
 
 type user struct {
-	model db.UserStore
+	db.UserStore // use UserStore methods unless specifically overridden
 }
 
 func NewUser(m db.UserStore) User {
-	return user{model: m}
+	return user{UserStore: m}
 }
 
 func (us user) Get(id int) (UserData, error) {
-	return adapter.Get("user", us.model.Get, asUserData)(id)
-}
-
-func (ps user) Delete(id int) error {
-	return ps.model.Delete(id)
+	return adapter.Get("user", us.UserStore.Get, asUserData)(id)
 }
 
 func (ps user) Add(name, pass string) error {
-	return ps.model.Add(db.User{
+	return ps.UserStore.Add(db.User{
 		Name:     name,
 		Password: pass,
 	})

@@ -10,8 +10,8 @@ import (
 )
 
 type post struct {
-	Add    httprouter.Handle
-	Delete httprouter.Handle
+	Add    http.HandlerFunc
+	Delete http.HandlerFunc
 }
 
 func newPost(posts service.Post) *post {
@@ -21,8 +21,8 @@ func newPost(posts service.Post) *post {
 	}
 }
 
-func addPost(svc service.Post) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func addPost(svc service.Post) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		err := svc.Add(
 			req.FormValue("title"),
 			req.FormValue("body"),
@@ -40,8 +40,9 @@ func addPost(svc service.Post) httprouter.Handle {
 	}
 }
 
-func deletePost(svc service.Post) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func deletePost(svc service.Post) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		p := httprouter.ParamsFromContext(req.Context())
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
 			log.Error("couldn't convert int", "error", err)

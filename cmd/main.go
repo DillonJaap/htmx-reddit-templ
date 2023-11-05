@@ -5,7 +5,9 @@ import (
 	"htmx-reddit/internal/db"
 	"htmx-reddit/internal/service"
 	"net/http"
+	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/charmbracelet/log"
 	"github.com/julienschmidt/httprouter"
 
@@ -17,7 +19,6 @@ const (
 )
 
 func main() {
-	router := httprouter.New()
 
 	// sqlDB connection
 	sqlDB, err := sql.Open("sqlite3", dbFile)
@@ -25,9 +26,16 @@ func main() {
 		log.Fatal("opening db", "error", err)
 	}
 
+	sess := scs.New()
+	sess.Lifetime = 24 * time.Hour
+	sess.Cookie.Secure = true
+
+	router := httprouter.New()
+
 	// setup routes
 	routes(
 		router,
+		sess,
 		service.NewPost(db.NewPostStore(sqlDB)),
 		service.NewComment(db.NewCommentStore(sqlDB)),
 		service.NewUser(db.NewUserStore(sqlDB)),

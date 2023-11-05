@@ -12,11 +12,11 @@ import (
 )
 
 type comment struct {
-	Add       httprouter.Handle
-	Reply     httprouter.Handle
-	Delete    httprouter.Handle
-	HideReply httprouter.Handle
-	ShowReply httprouter.Handle
+	Add       http.HandlerFunc
+	Reply     http.HandlerFunc
+	Delete    http.HandlerFunc
+	HideReply http.HandlerFunc
+	ShowReply http.HandlerFunc
 }
 
 func newComment(comments service.Comment) *comment {
@@ -29,8 +29,8 @@ func newComment(comments service.Comment) *comment {
 	}
 }
 
-func addComment(svc service.Comment) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func addComment(svc service.Comment) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		postID, err := convert.Int(req.FormValue("post-id"))
 		if err != nil {
 			log.Error("couldn't convert int", "error", err)
@@ -57,8 +57,9 @@ func addComment(svc service.Comment) httprouter.Handle {
 	}
 }
 
-func deleteComment(svc service.Comment) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func deleteComment(svc service.Comment) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		p := httprouter.ParamsFromContext(req.Context())
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
 			log.Error("couldn't convert int", "error", err)
@@ -76,8 +77,9 @@ func deleteComment(svc service.Comment) httprouter.Handle {
 	}
 }
 
-func reply(svc service.Comment) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func reply(svc service.Comment) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		p := httprouter.ParamsFromContext(req.Context())
 		parent_id, err := convert.Int(p.ByName("id"))
 		if err != nil {
 			log.Error("no id received")
@@ -106,16 +108,16 @@ func reply(svc service.Comment) httprouter.Handle {
 	}
 }
 
-func hideReplyBox() httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func hideReplyBox() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		strID := req.URL.Query().Get("id")
 		id, _ := convert.Int(strID)
 		templ.ReplyBox(id, false).Render(context.TODO(), w)
 	}
 }
 
-func showReplyBox() httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func showReplyBox() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		strID := req.URL.Query().Get("id")
 		id, _ := convert.Int(strID)
 		templ.ReplyBox(id, true).Render(context.TODO(), w)

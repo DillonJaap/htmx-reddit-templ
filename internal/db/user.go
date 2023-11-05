@@ -24,6 +24,7 @@ type UserStore interface {
 	Get(int) (User, error)
 	Add(User) error
 	Delete(int) error
+	Exists(id int) (bool, error)
 }
 
 type userModel struct {

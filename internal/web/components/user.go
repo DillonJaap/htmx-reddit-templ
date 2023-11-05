@@ -12,9 +12,9 @@ import (
 )
 
 type user struct {
-	Add       httprouter.Handle
-	Delete    httprouter.Handle
-	CheckPass httprouter.Handle
+	Add       http.HandlerFunc
+	Delete    http.HandlerFunc
+	CheckPass http.HandlerFunc
 }
 
 func newUser(users service.User) *user {
@@ -25,8 +25,8 @@ func newUser(users service.User) *user {
 	}
 }
 
-func checkPassword(model service.User) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func checkPassword(model service.User) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		pass := req.FormValue("password")
 		confirmPass := req.FormValue("password-confirm")
 		if pass != confirmPass {
@@ -38,8 +38,8 @@ func checkPassword(model service.User) httprouter.Handle {
 	}
 }
 
-func addUser(model service.User) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func addUser(model service.User) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		// confirm password
 		pass := req.FormValue("password")
 		confirmPass := req.FormValue("password-confirm")
@@ -62,8 +62,10 @@ func addUser(model service.User) httprouter.Handle {
 	}
 }
 
-func deleteUser(user service.User) httprouter.Handle {
-	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func deleteUser(user service.User) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		p := httprouter.ParamsFromContext(req.Context())
+
 		id, err := convert.Int(p.ByName("id"))
 		if err != nil {
 			log.Error("couldn't convert int", "error", err)

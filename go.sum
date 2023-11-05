@@ -1,5 +1,7 @@
 github.com/a-h/templ v0.2.364 h1:4vseUATyAzacrOOU1jPmLfkxet6Yg/NAmsA/4rDDhfo=
 github.com/a-h/templ v0.2.364/go.mod h1:6Lfhsl3Z4/vXl7jjEjkJRCqoWDGjDnuKgzjYMDSddas=
+github.com/alexedwards/scs/v2 v2.6.0 h1:vxNyhWZOnlWK9NsYlgFjSaP5IGN7Cm/sf6/slLJNBos=
+github.com/alexedwards/scs/v2 v2.6.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1/go.mod h1:uYgXzlJ7ZpABp8OJ+exZzJJhRNQ2ASbcXHWsFqH8hp8=
 github.com/charmbracelet/lipgloss v0.8.0 h1:IS00fk4XAHcf8uZKc3eHeMUTCxUH6NkaTrdyCQk84RU=

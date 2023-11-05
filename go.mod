@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/a-h/templ v0.2.364
+	github.com/alexedwards/scs/v2 v2.6.0
 	github.com/charmbracelet/log v0.2.4
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/mattn/go-sqlite3 v1.14.17
