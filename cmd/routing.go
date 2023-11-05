@@ -3,8 +3,8 @@ package main
 import (
 	mw "htmx-reddit/internal/middleware"
 	"htmx-reddit/internal/service"
-	"htmx-reddit/internal/web/components"
 	"htmx-reddit/internal/web/pages"
+	partials "htmx-reddit/internal/web/partials"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -33,7 +33,7 @@ func routes(
 	r.Handler("GET", "/users/new", mws(pages.NewUser))
 
 	// partial htmx data
-	components := components.NewHandler(commentService, postService, userService)
+	components := partials.NewHandler(commentService, postService, userService)
 
 	// Comment Partials
 	r.Handler("POST", "/comment/add", mws(components.Comment.Add))
