@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -25,6 +24,7 @@ type UserStore interface {
 	Add(User) error
 	Delete(int) error
 	Exists(id int) (bool, error)
+	Authenticate(name string, password string) (int, error)
 }
 
 type userModel struct {
@@ -33,22 +33,7 @@ type userModel struct {
 
 var _ UserStore = &userModel{}
 
-func createUserTable(DB *sql.DB) {
-	_, err := DB.Exec(`
-	CREATE TABLE IF NOT EXISTS user (
-		id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		name            TEXT NOT NULL,
-		hashed_password TEXT NOT NULL,
-		created_time    DATETIME NOT NULL
-	);
-	`)
-	if err != nil {
-		fmt.Printf("error creating table: %s", err)
-	}
-}
-
 func NewUserStore(db *sql.DB) UserStore {
-	createUserTable(db)
 	return &userModel{db}
 }
 

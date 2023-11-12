@@ -6,7 +6,7 @@ import (
 )
 
 
-templ PostComponent(post service.PostData) {
+templ PostComponent(post service.PostData, username string) {
 	<div style="font-size: 2.0em;padding: 0em;">{ post.Title }</div>
 	<div
  		class="container"
@@ -17,8 +17,11 @@ templ PostComponent(post service.PostData) {
 	"
 	>
 		<p>{ post.Body }</p>
-		@deleteButton(post.ID)
-		@editButton(post.ID)
+		{ post.Owner } - { post.TimeCreated.Format("2006-01-02") } 
+		if post.Owner == username {
+			@deleteButton(post.ID)
+			@editButton(post.ID)
+		}
 	</div>
 }
 
@@ -63,4 +66,3 @@ templ postPreviews(posts []service.PostData) {
 		}
 	</div>
 }
-

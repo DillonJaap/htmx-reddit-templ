@@ -5,7 +5,7 @@ import (
 	"htmx-reddit/internal/service"
 )
 
-templ CommentComponent(PostID int, comments []service.CommentData) {
+templ CommentComponent(PostID int, comments []service.CommentData, username string) {
 	<div id="comment-component" style="padding-top: 1em; padding-bottom: 1em;">
 		<form hx-post="/comment/add" hx-target="#comment-list" hx-swap="beforeend">
 			<textarea id="add-comment" name="comment" placeholder="new comment..."></textarea>
@@ -25,13 +25,13 @@ templ CommentComponent(PostID int, comments []service.CommentData) {
 		<hr style="border-top: solid;"/>
 		<div id="comment-list">
 			for _, c := range comments {
-				@Comment(c)
+				@Comment(c, username)
 			}
 		</div>
 	</div>
 }
 
-templ Comment(c service.CommentData) {
+templ Comment(c service.CommentData, username string) {
 	<div
  		class="comment container"
  		id={ fmt.Sprintf("comment-%d", c.ID) }
@@ -44,29 +44,32 @@ templ Comment(c service.CommentData) {
 		"
 	>
 		<div class="desc primary" style="white-space: pre-wrap;">{ c.Description }</div>
-		<div
- 			role="button"
- 			hx-post={ fmt.Sprintf("/comment/update/%d", c.ID) }
- 			hx-target={ fmt.Sprintf("#comment-%d", c.ID) }
- 			hx-swap="outerHTML"
- 			style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
-		>
-			edit
-		</div>
-		<div
- 			role="button"
- 			hx-delete={ fmt.Sprintf("/comment/delete/%d", c.ID) }
- 			hx-target={ fmt.Sprintf("#comment-%d", c.ID ) }
- 			hx-swap="outerHTML"
- 			style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
-		>
-			delete
-		</div>
+		{ c.Owner } - { c.TimeCreated.Format("2006-01-02") }
+		if c.Owner == username {
+			<div
+ 				role="button"
+ 				hx-post={ fmt.Sprintf("/comment/update/%d", c.ID) }
+ 				hx-target={ fmt.Sprintf("#comment-%d", c.ID) }
+ 				hx-swap="outerHTML"
+ 				style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
+			>
+				edit
+			</div>
+			<div
+ 				role="button"
+ 				hx-delete={ fmt.Sprintf("/comment/delete/%d", c.ID) }
+ 				hx-target={ fmt.Sprintf("#comment-%d", c.ID ) }
+ 				hx-swap="outerHTML"
+ 				style=" font-size: 0.8em; padding: 2px; border: none; background: none; "
+			>
+				delete
+			</div>
+		}
 		@ReplyBox(c.ID, false)
 		<div id={ fmt.Sprintf("reply-list-%d", c.ID) } style="padding-top: 0.6em">
 			if len(c.Replies) != 0 {
 				for _, reply := range c.Replies {
-					@Comment(reply)
+					@Comment(reply, username)
 				}
 			}
 		</div>

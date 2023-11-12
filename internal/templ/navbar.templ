@@ -1,0 +1,21 @@
+package templ
+
+templ NavBar(loggedIn bool, username string) {
+	<nav class="container">
+		<ul>
+			<li><strong>Website :)</strong></li>
+		</ul>
+		<ul>
+			<li><a href="/posts#">Posts</a></li>
+			if loggedIn {
+				<li>{username}</li>
+				<li><a href="/user/logout">Logout</a></li>
+			} else {
+				<li><a href="/users/new#">Sign Up</a></li>
+				<li><a href="/users/login#">Login</a></li>
+			}
+			<li><a href="#">Link</a></li>
+		</ul>
+	</nav>
+}
+

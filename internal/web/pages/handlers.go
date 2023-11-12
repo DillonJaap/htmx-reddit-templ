@@ -3,10 +3,12 @@ package pages
 import (
 	"context"
 	"htmx-reddit/internal/convert"
+	"htmx-reddit/internal/helpers"
 	"htmx-reddit/internal/service"
 	"htmx-reddit/internal/templ"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/charmbracelet/log"
 	"github.com/julienschmidt/httprouter"
 )
@@ -16,51 +18,74 @@ type Handler struct {
 	Post     http.HandlerFunc
 	AllPosts http.HandlerFunc
 	NewPost  http.HandlerFunc
-	NewUser  http.HandlerFunc
+	SignUp   http.HandlerFunc
+	Login    http.HandlerFunc
 }
 
 func NewHandler(
 	c service.Comment,
 	p service.Post,
 	u service.User,
+	s *scs.SessionManager,
 ) *Handler {
 	return &Handler{
-		Home:     allPosts(p),
-		AllPosts: allPosts(p),
-		Post:     postPage(p, c),
-		NewPost:  newPost(),
-		NewUser:  newUser(),
+		Home:     allPosts(p, s),
+		AllPosts: allPosts(p, s),
+		Post:     postPage(p, c, s),
+		NewPost:  newPost(s),
+		SignUp:   signup(s),
+		Login:    login(),
 	}
 }
 
-func allPosts(ps service.Post) http.HandlerFunc {
+func allPosts(ps service.Post, sess *scs.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		postList, err := ps.GetAll()
 		if err != nil {
 			log.Error("failed to get posts", "error", err)
 		}
 
-		templ.AllPosts(postList).Render(context.TODO(), w)
+		templ.AllPosts(
+			postList,
+			helpers.IsAuthenticated(req),
+			sess.GetString(req.Context(), "username"),
+		).Render(context.TODO(), w)
 	}
 }
 
-func newPost() http.HandlerFunc {
+func newPost(sess *scs.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		templ.NewPost().Render(context.TODO(), w)
+		templ.NewPost(
+			helpers.IsAuthenticated(req),
+			sess.GetString(req.Context(), "username"),
+		).Render(context.TODO(), w)
 	}
 }
 
-func newUser() http.HandlerFunc {
+func signup(sess *scs.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var pageData struct {
 			ShowPassErr bool
 		}
 		pageData.ShowPassErr = false
-		templ.NewUser().Render(context.TODO(), w)
+		templ.SignUp(
+			helpers.IsAuthenticated(req),
+			sess.GetString(req.Context(), "username"),
+		).Render(context.TODO(), w)
 	}
 }
 
-func postPage(postService service.Post, commentService service.Comment) http.HandlerFunc {
+func login() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var pageData struct {
+			ShowPassErr bool
+		}
+		pageData.ShowPassErr = false
+		templ.Login().Render(context.TODO(), w)
+	}
+}
+
+func postPage(postService service.Post, commentService service.Comment, sess *scs.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		p := httprouter.ParamsFromContext(req.Context())
 		id, err := convert.Int(p.ByName("id"))
@@ -72,8 +97,15 @@ func postPage(postService service.Post, commentService service.Comment) http.Han
 		if err != nil {
 			log.Error("failed to get posts", "error", err)
 		}
+		log.Printf("%+v", post)
 
 		comments := commentService.GetByPostID(post.ID)
-		templ.Post(post, comments).Render(context.TODO(), w)
+
+		templ.Post(
+			post,
+			comments,
+			helpers.IsAuthenticated(req),
+			sess.GetString(req.Context(), "username"),
+		).Render(context.TODO(), w)
 	}
 }

@@ -2,8 +2,9 @@ package templ
 
 import "htmx-reddit/internal/service"
 
-templ AllPosts(posts []service.PostData) {
+templ AllPosts(posts []service.PostData, loggedIn bool, username string) {
 	@Base() {
+		@NavBar(loggedIn, username)
 		<main class="container">
 			<h1>Posts</h1>
 			<a role="button" href="/posts/new">Add Post</a>
@@ -12,17 +13,19 @@ templ AllPosts(posts []service.PostData) {
 	}
 }
 
-templ Post(post service.PostData, comment []service.CommentData) {
+templ Post(post service.PostData, comment []service.CommentData, loggedIn bool, username string) {
 	@Base() {
+		@NavBar(loggedIn, username)
 		<main class="container">
-			@PostComponent(post)
-			@CommentComponent(post.ID, comment)
+			@PostComponent(post, username)
+			@CommentComponent(post.ID, comment, username)
 		</main>
 	}
 }
 
-templ NewPost() {
+templ NewPost(loggedIn bool, username string) {
 	@Base() {
+		@NavBar(loggedIn, username)
 		<main class="container">
 			<form hx-post="/post/add">
 				<input type="text" name="title"/>
@@ -34,8 +37,9 @@ templ NewPost() {
 	}
 }
 
-templ NewUser() {
+templ SignUp(loggedIn bool, username string) {
 	@Base() {
+		@NavBar(loggedIn, username)
 		<main class="container">
 			<form hx-post="/user/add" hx-target="#error">
 				User Name
@@ -59,3 +63,17 @@ templ NewUser() {
 	}
 }
 
+templ Login() {
+	@Base() {
+		@NavBar(false, "")
+		<main class="container">
+			<form hx-post="/user/login">
+				User Name
+				<input type="text" name="username"/>
+				Password
+				<input type="password" name="password"/>
+				<input type="submit" value="login"/>
+			</form>
+		</main>
+	}
+}

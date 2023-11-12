@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"htmx-reddit/internal/helpers"
 	"htmx-reddit/internal/service"
 	"net/http"
 
@@ -12,14 +13,14 @@ type Middleware func(http.Handler) http.Handler
 
 func Join(mws ...Middleware) Middleware {
 	return func(next http.Handler) http.Handler {
-		for i := 0; i < len(mws); i++ {
+		for i := len(mws) - 1; i >= 0; i-- {
 			next = mws[i](next)
 		}
 		return next
 	}
 }
 
-func AuthenticateMiddleware(sess *scs.Session, user service.User) Middleware {
+func Authenticate(sess *scs.Session, user service.User) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			id := sess.GetInt(r.Context(), "authenticatedUserID")
@@ -27,10 +28,9 @@ func AuthenticateMiddleware(sess *scs.Session, user service.User) Middleware {
 				next.ServeHTTP(w, r)
 				return
 			}
-
 			exists, err := user.Exists(id)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
@@ -39,6 +39,19 @@ func AuthenticateMiddleware(sess *scs.Session, user service.User) Middleware {
 				r = r.WithContext(ctx)
 			}
 
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func RequireAuthentication() Middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !helpers.IsAuthenticated(r) {
+				w.Header().Set("HX-Redirect", "/users/login")
+				return
+			}
+			w.Header().Add("Cache-Control", "no-store")
 			next.ServeHTTP(w, r)
 		})
 	}

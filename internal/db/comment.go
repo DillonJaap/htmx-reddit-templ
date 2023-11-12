@@ -3,8 +3,6 @@ package db
 import (
 	"database/sql"
 	"time"
-
-	"github.com/charmbracelet/log"
 )
 
 type Comment struct {
@@ -12,6 +10,8 @@ type Comment struct {
 	ParentID    int
 	PostID      int
 	Description string
+	Owner       string
+	OwnerID     int
 	TimeCreated time.Time
 }
 
@@ -30,25 +30,7 @@ type commentModel struct {
 
 var _ CommentStore = &commentModel{}
 
-func createCommentTable(DB *sql.DB) {
-	_, err := DB.Exec(`
-	CREATE TABLE IF NOT EXISTS comment (
-		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		description TEXT NOT NULL,
-		created_time DATETIME NOT NULL,
-		parent_id INTEGER,
-		post_id INTEGER,
-		FOREIGN KEY (parent_id) REFERENCES comment (id),
-		FOREIGN KEY (post_id) REFERENCES post (id)
-	);
-	`)
-	if err != nil {
-		log.Printf("error creating table: %s", err)
-	}
-}
-
 func NewCommentStore(db *sql.DB) CommentStore {
-	createCommentTable(db)
 	return &commentModel{db}
 }
 
@@ -56,13 +38,14 @@ func (m *commentModel) Get(id int) (Comment, error) {
 	var comment Comment
 
 	row := m.DB.QueryRow(
-		"SELECT id, description, created_time, parent_id FROM comment WHERE id=?", id,
+		"SELECT id, description, created_time, parent_id, owner FROM comment WHERE id=?", id,
 	)
 	err := row.Scan(
 		&comment.ID,
 		&comment.Description,
 		&comment.TimeCreated,
 		&comment.ParentID,
+		&comment.Owner,
 	)
 	if err != nil {
 		return comment, err
@@ -77,7 +60,7 @@ func (m *commentModel) GetAll() ([]Comment, error) {
 	var comment Comment
 
 	// Get all top level comments
-	rows, err := m.DB.Query("SELECT id, description, created_time, parent_id FROM comment WHERE parent_id = 0")
+	rows, err := m.DB.Query("SELECT id, description, created_time, parent_id, owner FROM comment WHERE parent_id = 0")
 	if err != nil {
 		return nil, err
 	}
@@ -89,6 +72,7 @@ func (m *commentModel) GetAll() ([]Comment, error) {
 			&comment.Description,
 			&comment.TimeCreated,
 			&comment.ParentID,
+			&comment.Owner,
 		)
 		if err != nil {
 			return nil, err
@@ -104,7 +88,7 @@ func (m *commentModel) GetByParentID(parentID int) ([]Comment, error) {
 	var comment Comment
 
 	// Get all top level comments
-	rows, err := m.DB.Query("SELECT id, description, created_time, parent_id FROM comment WHERE parent_id=?", parentID)
+	rows, err := m.DB.Query("SELECT id, description, created_time, parent_id, owner FROM comment WHERE parent_id=?", parentID)
 	if err != nil {
 		return nil, err
 	}
@@ -116,6 +100,7 @@ func (m *commentModel) GetByParentID(parentID int) ([]Comment, error) {
 			&comment.Description,
 			&comment.TimeCreated,
 			&comment.ParentID,
+			&comment.Owner,
 		)
 		if err != nil {
 			return nil, err
@@ -131,7 +116,7 @@ func (m *commentModel) GetByPostID(postID int) ([]Comment, error) {
 	var comment Comment
 
 	// Get all top level comments
-	rows, err := m.DB.Query("SELECT id, description, created_time FROM comment WHERE parent_id=?", postID)
+	rows, err := m.DB.Query("SELECT id, description, created_time, owner FROM comment WHERE post_id=?", postID)
 	if err != nil {
 		return nil, err
 	}
@@ -142,6 +127,7 @@ func (m *commentModel) GetByPostID(postID int) ([]Comment, error) {
 			&comment.ID,
 			&comment.Description,
 			&comment.TimeCreated,
+			&comment.Owner,
 		)
 		if err != nil {
 			return nil, err
@@ -154,11 +140,13 @@ func (m *commentModel) GetByPostID(postID int) ([]Comment, error) {
 func (m *commentModel) Add(comment Comment) (int, error) {
 	// TODO create SQL query to get reply depth of parent comment
 	result, err := m.DB.Exec(
-		"INSERT INTO comment (description, created_time, parent_id, post_id) VALUES (?,?,?,?);",
+		"INSERT INTO comment (description, created_time, parent_id, post_id, owner, owner_id) VALUES (?,?,?,?,?,?);",
 		comment.Description,
 		time.Now(),
 		comment.ParentID,
 		comment.PostID,
+		comment.Owner,
+		comment.OwnerID,
 	)
 	if err != nil {
 		return 0, err

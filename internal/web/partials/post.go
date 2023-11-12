@@ -24,6 +24,7 @@ func newPost(posts service.Post) *post {
 func addPost(svc service.Post) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		err := svc.Add(
+			req.Context(),
 			req.FormValue("title"),
 			req.FormValue("body"),
 		)
@@ -50,7 +51,7 @@ func deletePost(svc service.Post) http.HandlerFunc {
 			return
 		}
 
-		if err = svc.Delete(int(id)); err != nil {
+		if err = svc.Delete(req.Context(), int(id)); err != nil {
 			log.Error("could't delete post", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return

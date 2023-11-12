@@ -7,6 +7,7 @@ import (
 	"htmx-reddit/internal/templ"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/charmbracelet/log"
 	"github.com/julienschmidt/httprouter"
 )
@@ -19,17 +20,17 @@ type comment struct {
 	ShowReply http.HandlerFunc
 }
 
-func newComment(comments service.Comment) *comment {
+func newComment(comments service.Comment, sess *scs.SessionManager) *comment {
 	return &comment{
-		Add:       addComment(comments),
-		Reply:     reply(comments),
+		Add:       addComment(comments, sess),
+		Reply:     reply(comments, sess),
 		Delete:    deleteComment(comments),
 		HideReply: hideReplyBox(),
 		ShowReply: showReplyBox(),
 	}
 }
 
-func addComment(svc service.Comment) http.HandlerFunc {
+func addComment(svc service.Comment, sess *scs.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		postID, err := convert.Int(req.FormValue("post-id"))
 		if err != nil {
@@ -38,6 +39,7 @@ func addComment(svc service.Comment) http.HandlerFunc {
 			return
 		}
 		id, err := svc.Add(
+			req.Context(),
 			postID,
 			req.FormValue("comment"),
 		)
@@ -53,7 +55,10 @@ func addComment(svc service.Comment) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		templ.Comment(comment).Render(context.TODO(), w)
+		templ.Comment(
+			comment,
+			sess.GetString(req.Context(), "username"),
+		).Render(context.TODO(), w)
 	}
 }
 
@@ -67,7 +72,7 @@ func deleteComment(svc service.Comment) http.HandlerFunc {
 			return
 		}
 
-		if err = svc.Delete(int(id)); err != nil {
+		if err = svc.Delete(req.Context(), int(id)); err != nil {
 			log.Error("could't delete comment", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -77,17 +82,18 @@ func deleteComment(svc service.Comment) http.HandlerFunc {
 	}
 }
 
-func reply(svc service.Comment) http.HandlerFunc {
+func reply(svc service.Comment, sess *scs.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		p := httprouter.ParamsFromContext(req.Context())
-		parent_id, err := convert.Int(p.ByName("id"))
+		parentID, err := convert.Int(p.ByName("id"))
 		if err != nil {
 			log.Error("no id received")
 			return
 		}
 
-		id, err := svc.Add(
-			parent_id,
+		id, err := svc.Reply(
+			req.Context(),
+			parentID,
 			req.FormValue("comment"),
 		)
 		if err != nil {
@@ -104,7 +110,10 @@ func reply(svc service.Comment) http.HandlerFunc {
 		}
 
 		w.Header().Add("HX-Trigger", "hide")
-		templ.Comment(comment).Render(context.TODO(), w)
+		templ.Comment(
+			comment,
+			sess.GetString(req.Context(), "username"),
+		).Render(context.TODO(), w)
 	}
 }
 

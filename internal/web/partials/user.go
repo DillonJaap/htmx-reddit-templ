@@ -15,6 +15,8 @@ type user struct {
 	Add       http.HandlerFunc
 	Delete    http.HandlerFunc
 	CheckPass http.HandlerFunc
+	Login     http.HandlerFunc
+	Logout    http.HandlerFunc
 }
 
 func newUser(users service.User) *user {
@@ -22,6 +24,8 @@ func newUser(users service.User) *user {
 		Add:       addUser(users),
 		Delete:    deleteUser(users),
 		CheckPass: checkPassword(users),
+		Login:     login(users),
+		Logout:    logout(users),
 	}
 }
 
@@ -55,9 +59,7 @@ func addUser(model service.User) http.HandlerFunc {
 			return
 		}
 
-		if req.FormValue("redirect") == "true" {
-			w.Header().Set("HX-Redirect", "/posts#")
-		}
+		w.Header().Set("HX-Redirect", "/users/login")
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -80,6 +82,32 @@ func deleteUser(user service.User) http.HandlerFunc {
 		}
 
 		w.Header().Set("HX-Redirect", "/posts#")
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusSeeOther)
+	}
+}
+
+func login(user service.User) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		// confirm password
+		pass := req.FormValue("password")
+		username := req.FormValue("username")
+
+		err := user.Login(req.Context(), username, pass)
+		if err != nil {
+			w.Header().Set("HX-Redirect", "/posts#")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.Header().Set("HX-Redirect", "/posts#")
+		w.WriteHeader(http.StatusSeeOther)
+	}
+}
+
+func logout(user service.User) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		user.Logout(req.Context())
+		w.Header().Set("HX-Redirect", "/posts#")
+		w.WriteHeader(http.StatusSeeOther)
 	}
 }

@@ -8,3 +8,5 @@
 - [ ] authentication middleware so you can actaully log in
 - [ ] sessions or cookies
 - [ ] goqu library?
+- [ ] use sqlite for storing sessions
+- [ ] proper failure for not logging in

@@ -22,30 +22,43 @@ func routes(
 	// CSS
 	r.ServeFiles("/static/css/*filepath", http.Dir("./css/"))
 
-	mws := mw.Join(sess.LoadAndSave, mw.AuthenticateMiddleware(sess, userService))
+	// setup middlewares
+	defaultMW := mw.Join(
+		sess.LoadAndSave,
+		mw.Authenticate(sess, userService),
+	)
+
+	authMW := mw.Join(
+		defaultMW,
+		mw.RequireAuthentication(),
+	)
 
 	// pages
-	pages := pages.NewHandler(commentService, postService, userService)
-	r.Handler("GET", "/", mws(pages.Home))
-	r.Handler("GET", "/posts", mws(pages.AllPosts))
-	r.Handler("GET", "/posts/new", mws(pages.NewPost))
-	r.Handler("GET", "/post/:id", mws(pages.Post))
-	r.Handler("GET", "/users/new", mws(pages.NewUser))
+	pages := pages.NewHandler(commentService, postService, userService, sess)
+	r.Handler("GET", "/", defaultMW(pages.Home))
+	r.Handler("GET", "/posts", defaultMW(pages.AllPosts))
+	r.Handler("GET", "/posts/new", defaultMW(pages.NewPost))
+	r.Handler("GET", "/post/:id", defaultMW(pages.Post))
+	r.Handler("GET", "/users/new", defaultMW(pages.SignUp))
+	r.Handler("GET", "/users/login", defaultMW(pages.Login))
 
 	// partial htmx data
-	components := partials.NewHandler(commentService, postService, userService)
+	partials := partials.NewHandler(sess, commentService, postService, userService)
 
 	// Comment Partials
-	r.Handler("POST", "/comment/add", mws(components.Comment.Add))
-	r.Handler("DELETE", "/comment/delete/:id", mws(components.Comment.Delete))
-	r.Handler("POST", "/comment/reply/:id", mws(components.Comment.Reply))
-	r.Handler("POST", "/reply/show", mws(components.Comment.ShowReply))
-	r.Handler("POST", "/reply/hide", mws(components.Comment.HideReply))
+	r.Handler("POST", "/comment/add", authMW(partials.Comment.Add))
+	r.Handler("DELETE", "/comment/delete/:id", authMW(partials.Comment.Delete))
+	r.Handler("POST", "/comment/reply/:id", authMW(partials.Comment.Reply))
+
+	r.Handler("POST", "/reply/show", defaultMW(partials.Comment.ShowReply))
+	r.Handler("POST", "/reply/hide", defaultMW(partials.Comment.HideReply))
 
 	// Post Partials
-	r.Handler("POST", "/post/add", mws(components.Post.Add))
-	r.Handler("DELETE", "/post/delete/:id", mws(components.Post.Delete))
+	r.Handler("POST", "/post/add", authMW(partials.Post.Add))
+	r.Handler("DELETE", "/post/delete/:id", authMW(partials.Post.Delete))
 
 	// User Partials
-	r.Handler("POST", "/user/add", mws(components.User.Add))
+	r.Handler("POST", "/user/add", defaultMW(partials.User.Add))
+	r.Handler("POST", "/user/login", defaultMW(partials.User.Login))
+	r.Handler("GET", "/user/logout", authMW(partials.User.Logout))
 }

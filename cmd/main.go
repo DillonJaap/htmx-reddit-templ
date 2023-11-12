@@ -19,12 +19,12 @@ const (
 )
 
 func main() {
-
-	// sqlDB connection
-	sqlDB, err := sql.Open("sqlite3", dbFile)
+	// dbConn connection
+	dbConn, err := sql.Open("sqlite3", dbFile)
 	if err != nil {
 		log.Fatal("opening db", "error", err)
 	}
+	db.Setup(dbConn)
 
 	sess := scs.New()
 	sess.Lifetime = 24 * time.Hour
@@ -36,9 +36,9 @@ func main() {
 	routes(
 		router,
 		sess,
-		service.NewPost(db.NewPostStore(sqlDB)),
-		service.NewComment(db.NewCommentStore(sqlDB)),
-		service.NewUser(db.NewUserStore(sqlDB)),
+		service.NewPost(db.NewPostStore(dbConn), sess),
+		service.NewComment(db.NewCommentStore(dbConn), sess),
+		service.NewUser(db.NewUserStore(dbConn), sess),
 	)
 
 	log.Fatal(
