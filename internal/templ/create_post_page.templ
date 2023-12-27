@@ -1,0 +1,47 @@
+package templ
+
+templ NewPost(loggedIn bool, username string) {
+	@Base() {
+		@NavBar(loggedIn, username)
+		<main class="container">
+			<form hx-post="/post/add" hx-target="#error-box" hx-swap="outerHTML">
+				<input type="text" name="title"/>
+				<textarea id="add-post" name="body" placeholder="body"></textarea>
+				<div id="error-box"></div>
+				<input type="submit" value="Add Post"/>
+				<input type="hidden" name="redirect" value="true"/>
+			</form>
+		</main>
+	}
+}
+
+templ errorBox() {
+	<div
+ 		id="error-box"
+ 		style="
+				color: red;
+				padding: 0.25em;
+				text-align: center;
+			"
+	>
+		{ children... }
+	</div>
+}
+
+templ ErrorNotLoggedIn() {
+	@errorBox() {
+		Error: you must be logged in to create a post
+	}
+}
+
+templ ErrorSql() {
+	@errorBox() {
+		Error: failed to add post - please try again later
+	}
+}
+
+templ ErrorUnknownError() {
+	@errorBox() {
+		Error: failed to add post - unknown error
+	}
+}

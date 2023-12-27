@@ -76,5 +76,6 @@ func (u user) Logout(ctx context.Context) error {
 	}
 
 	u.sess.Remove(ctx, "authenticatedUserID")
+	u.sess.Remove(ctx, "username")
 	return nil
 }

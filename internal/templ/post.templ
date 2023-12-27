@@ -5,19 +5,18 @@ import (
 	"htmx-reddit/internal/service"
 )
 
-
 templ PostComponent(post service.PostData, username string) {
 	<div style="font-size: 2.0em;padding: 0em;">{ post.Title }</div>
 	<div
  		class="container"
  		style="
-	border: ridge;
-	border-radius: 0.3em;
-	padding: 1.0em;
-	"
+			border: ridge;
+			border-radius: 0.3em;
+			padding: 1.0em;
+			"
 	>
 		<p>{ post.Body }</p>
-		{ post.Owner } - { post.TimeCreated.Format("2006-01-02") } 
+		{ post.Owner } - { post.TimeCreated.Format("2006-01-02") }
 		if post.Owner == username {
 			@deleteButton(post.ID)
 			@editButton(post.ID)
@@ -44,7 +43,7 @@ templ editButton(postID int) {
 	<div
  		role="button"
  		class="primary"
- 		hx-delete={ fmt.Sprintf("post/update/%d", postID) }
+ 		hx-put={ fmt.Sprintf("post/update/%d", postID) }
  		style="
 				padding: 4px;
 				border: none;

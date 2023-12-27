@@ -4,6 +4,7 @@ import (
 	"context"
 	"htmx-reddit/internal/helpers"
 	"htmx-reddit/internal/service"
+	"htmx-reddit/internal/templ"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -20,7 +21,7 @@ func Join(mws ...Middleware) Middleware {
 	}
 }
 
-func Authenticate(sess *scs.Session, user service.User) Middleware {
+func Authenticate(sess *scs.SessionManager, user service.User) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			id := sess.GetInt(r.Context(), "authenticatedUserID")
@@ -48,7 +49,8 @@ func RequireAuthentication() Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !helpers.IsAuthenticated(r) {
-				w.Header().Set("HX-Redirect", "/users/login")
+				//w.Header().Set("HX-Redirect", "/users/login")
+				templ.ErrorNotLoggedIn().Render(r.Context(), w)
 				return
 			}
 			w.Header().Add("Cache-Control", "no-store")

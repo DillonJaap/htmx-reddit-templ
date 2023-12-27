@@ -18,3 +18,7 @@ func IsAuthenticated(r *http.Request) bool {
 func IsLoggedInUser(ctx context.Context, sess *scs.SessionManager, wantID int) bool {
 	return sess.GetInt(ctx, "authenticatedUserID") == wantID
 }
+
+func IsLoggedIn(ctx context.Context, sess *scs.SessionManager) bool {
+	return sess.GetInt(ctx, "authenticatedUserID") != 0
+}

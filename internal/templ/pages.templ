@@ -23,19 +23,6 @@ templ Post(post service.PostData, comment []service.CommentData, loggedIn bool, 
 	}
 }
 
-templ NewPost(loggedIn bool, username string) {
-	@Base() {
-		@NavBar(loggedIn, username)
-		<main class="container">
-			<form hx-post="/post/add">
-				<input type="text" name="title"/>
-				<textarea id="add-post" name="body" placeholder="body"></textarea>
-				<input type="submit" value="Add Post"/>
-				<input type="hidden" name="redirect" value="true"/>
-			</form>
-		</main>
-	}
-}
 
 templ SignUp(loggedIn bool, username string) {
 	@Base() {
@@ -55,9 +42,8 @@ templ SignUp(loggedIn bool, username string) {
  						hx-target="#error"
 					/>
 				</div>
-				@PasswordsDoNotMatch(false)
+				<div id="error"></div>
 				<input type="submit" value="Create User Account"/>
-				<input type="hidden" name="redirect" value="true"/>
 			</form>
 		</main>
 	}
@@ -67,11 +53,12 @@ templ Login() {
 	@Base() {
 		@NavBar(false, "")
 		<main class="container">
-			<form hx-post="/user/login">
+			<form hx-post="/user/login" hx-target="#error">
 				User Name
 				<input type="text" name="username"/>
 				Password
 				<input type="password" name="password"/>
+				<div id="error"></div>
 				<input type="submit" value="login"/>
 			</form>
 		</main>

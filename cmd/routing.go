@@ -60,5 +60,5 @@ func routes(
 	// User Partials
 	r.Handler("POST", "/user/add", defaultMW(partials.User.Add))
 	r.Handler("POST", "/user/login", defaultMW(partials.User.Login))
-	r.Handler("GET", "/user/logout", authMW(partials.User.Logout))
+	r.Handler("POST", "/user/logout", authMW(partials.User.Logout))
 }

@@ -1,7 +1,6 @@
 package components
 
 import (
-	"context"
 	"htmx-reddit/internal/convert"
 	"htmx-reddit/internal/service"
 	"htmx-reddit/internal/templ"
@@ -34,7 +33,7 @@ func checkPassword(model service.User) http.HandlerFunc {
 		pass := req.FormValue("password")
 		confirmPass := req.FormValue("password-confirm")
 		if pass != confirmPass {
-			templ.PasswordsDoNotMatch(true).Render(context.TODO(), w)
+			templ.PasswordsDoNotMatch().Render(req.Context(), w)
 			return
 		}
 
@@ -48,14 +47,14 @@ func addUser(model service.User) http.HandlerFunc {
 		pass := req.FormValue("password")
 		confirmPass := req.FormValue("password-confirm")
 		if pass != confirmPass {
-			templ.PasswordsDoNotMatch(true).Render(context.TODO(), w)
+			templ.PasswordsDoNotMatch().Render(req.Context(), w)
 			return
 		}
 
 		err := model.Add(req.FormValue("username"), pass)
 		if err != nil {
 			log.Error("getting user id", "error", err)
-			w.WriteHeader(http.StatusBadRequest)
+			templ.FailedToCreateUser().Render(req.Context(), w)
 			return
 		}
 
@@ -94,8 +93,7 @@ func login(user service.User) http.HandlerFunc {
 
 		err := user.Login(req.Context(), username, pass)
 		if err != nil {
-			w.Header().Set("HX-Redirect", "/posts#")
-			w.WriteHeader(http.StatusUnauthorized)
+			templ.FailedToLogin().Render(req.Context(), w)
 			return
 		}
 
@@ -107,7 +105,7 @@ func login(user service.User) http.HandlerFunc {
 func logout(user service.User) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		user.Logout(req.Context())
-		w.Header().Set("HX-Redirect", "/posts#")
+		w.Header().Set("HX-Refresh", "true")
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }

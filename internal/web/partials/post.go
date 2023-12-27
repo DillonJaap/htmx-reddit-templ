@@ -1,8 +1,10 @@
 package components
 
 import (
+	"errors"
 	"htmx-reddit/internal/convert"
 	"htmx-reddit/internal/service"
+	"htmx-reddit/internal/templ"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -29,10 +31,17 @@ func addPost(svc service.Post) http.HandlerFunc {
 			req.FormValue("body"),
 		)
 		if err != nil {
-			log.Error("getting post id", "error", err)
-			w.WriteHeader(http.StatusBadRequest)
+			log.Error("Error creating post", "error", err)
+			if errors.Is(err, service.ErrSqlError) {
+				templ.ErrorSql().Render(req.Context(), w)
+			} else {
+				templ.ErrorUnknownError().Render(req.Context(), w)
+			}
+
+			w.WriteHeader(http.StatusOK)
 			return
 		}
+		log.Info("Created Post", "title", req.FormValue("title"))
 
 		if req.FormValue("redirect") == "true" {
 			w.Header().Set("HX-Redirect", "/posts#")

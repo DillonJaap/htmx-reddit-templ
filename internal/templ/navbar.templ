@@ -9,7 +9,7 @@ templ NavBar(loggedIn bool, username string) {
 			<li><a href="/posts#">Posts</a></li>
 			if loggedIn {
 				<li>{username}</li>
-				<li><a href="/user/logout">Logout</a></li>
+				<li><a hx-post="/user/logout">Logout</a></li>
 			} else {
 				<li><a href="/users/new#">Sign Up</a></li>
 				<li><a href="/users/login#">Login</a></li>

@@ -1,10 +1,14 @@
 package templ
 
-templ PasswordsDoNotMatch(doNotMatch bool) {
-	if doNotMatch {
-		<div id="error" class="primary">Passwords don't match</div>
-	} else {
-		<div id="error"></div>
-	}
+
+templ PasswordsDoNotMatch() {
+	<div id="error" class="primary">Passwords don't match</div>
 }
 
+templ FailedToCreateUser() {
+	<div id="error" class="primary">Failed to signup</div>
+}
+
+templ FailedToLogin() {
+	<div id="error" class="primary">Failed to login, unknown user or incorrect password</div>
+}

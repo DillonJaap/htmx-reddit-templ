@@ -3,16 +3,20 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"htmx-reddit/internal/adapter"
 	"htmx-reddit/internal/db"
 	"htmx-reddit/internal/helpers"
+	err_ext "htmx-reddit/lib/errors_ext"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
 )
 
 var (
+	ErrNotLoggedIn          = errors.New("user is not logged in")
 	ErrUnauthorizedToDelete = errors.New("unauthorized to delete post")
+	ErrSqlError             = errors.New("")
 )
 
 type PostData struct {
@@ -63,18 +67,24 @@ func (p post) GetAll() ([]PostData, error) {
 }
 
 func (p post) Add(ctx context.Context, title, body string) error {
+	if !helpers.IsLoggedIn(ctx, p.sess) {
+		return ErrNotLoggedIn
+	}
 	_, err := p.PostStore.Add(db.Post{
 		Title:   title,
 		Body:    body,
 		Owner:   p.sess.GetString(ctx, "username"),
 		OwnerID: p.sess.GetInt(ctx, "authenticatedUserID"),
 	})
-	return err
+	if err != nil {
+		return err_ext.Join(ErrSqlError, err)
+	}
+	return nil
 }
 
 func (p post) Delete(ctx context.Context, id int) error {
 	if !helpers.IsLoggedInUser(ctx, p.sess, id) {
-		return ErrUnauthorizedToDelete
+		return fmt.Errorf("%w: LoggedInUserid is: %d", ErrUnauthorizedToDelete, id)
 	}
 
 	return p.PostStore.Delete(id)

@@ -5,8 +5,9 @@
 - [x] consistent structure
 - [x] should the handler logic be at the same level as the controller?
 - [ ] tailwind
-- [ ] authentication middleware so you can actaully log in
-- [ ] sessions or cookies
+- [x] authentication middleware so you can actaully log in
+- [x] sessions or cookies
 - [ ] goqu library?
 - [ ] use sqlite for storing sessions
 - [ ] proper failure for not logging in
+- [ ] reply button only shows up if you are logged in

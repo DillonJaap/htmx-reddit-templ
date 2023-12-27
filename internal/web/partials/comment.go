@@ -1,7 +1,6 @@
 package components
 
 import (
-	"context"
 	"htmx-reddit/internal/convert"
 	"htmx-reddit/internal/service"
 	"htmx-reddit/internal/templ"
@@ -58,7 +57,7 @@ func addComment(svc service.Comment, sess *scs.SessionManager) http.HandlerFunc 
 		templ.Comment(
 			comment,
 			sess.GetString(req.Context(), "username"),
-		).Render(context.TODO(), w)
+		).Render(req.Context(), w)
 	}
 }
 
@@ -113,7 +112,7 @@ func reply(svc service.Comment, sess *scs.SessionManager) http.HandlerFunc {
 		templ.Comment(
 			comment,
 			sess.GetString(req.Context(), "username"),
-		).Render(context.TODO(), w)
+		).Render(req.Context(), w)
 	}
 }
 
@@ -121,7 +120,7 @@ func hideReplyBox() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		strID := req.URL.Query().Get("id")
 		id, _ := convert.Int(strID)
-		templ.ReplyBox(id, false).Render(context.TODO(), w)
+		templ.ReplyBox(id, false).Render(req.Context(), w)
 	}
 }
 
@@ -129,6 +128,6 @@ func showReplyBox() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		strID := req.URL.Query().Get("id")
 		id, _ := convert.Int(strID)
-		templ.ReplyBox(id, true).Render(context.TODO(), w)
+		templ.ReplyBox(id, true).Render(req.Context(), w)
 	}
 }

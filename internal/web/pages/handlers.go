@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"context"
 	"htmx-reddit/internal/convert"
 	"htmx-reddit/internal/helpers"
 	"htmx-reddit/internal/service"
@@ -49,7 +48,7 @@ func allPosts(ps service.Post, sess *scs.SessionManager) http.HandlerFunc {
 			postList,
 			helpers.IsAuthenticated(req),
 			sess.GetString(req.Context(), "username"),
-		).Render(context.TODO(), w)
+		).Render(req.Context(), w)
 	}
 }
 
@@ -58,7 +57,7 @@ func newPost(sess *scs.SessionManager) http.HandlerFunc {
 		templ.NewPost(
 			helpers.IsAuthenticated(req),
 			sess.GetString(req.Context(), "username"),
-		).Render(context.TODO(), w)
+		).Render(req.Context(), w)
 	}
 }
 
@@ -71,7 +70,7 @@ func signup(sess *scs.SessionManager) http.HandlerFunc {
 		templ.SignUp(
 			helpers.IsAuthenticated(req),
 			sess.GetString(req.Context(), "username"),
-		).Render(context.TODO(), w)
+		).Render(req.Context(), w)
 	}
 }
 
@@ -81,7 +80,7 @@ func login() http.HandlerFunc {
 			ShowPassErr bool
 		}
 		pageData.ShowPassErr = false
-		templ.Login().Render(context.TODO(), w)
+		templ.Login().Render(req.Context(), w)
 	}
 }
 
@@ -106,6 +105,6 @@ func postPage(postService service.Post, commentService service.Comment, sess *sc
 			comments,
 			helpers.IsAuthenticated(req),
 			sess.GetString(req.Context(), "username"),
-		).Render(context.TODO(), w)
+		).Render(req.Context(), w)
 	}
 }
